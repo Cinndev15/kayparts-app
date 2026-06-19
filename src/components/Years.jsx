@@ -5,12 +5,14 @@ import {
   HelpCircle, Edit2
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Swal from 'sweetalert2';
 
 const Years = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   // Form states for creating a new year
   const [newYear, setNewYear] = useState('');
@@ -31,18 +33,21 @@ const Years = ({ user, onLogout }) => {
   const closeModal = () => {
     setIsModalOpen(false);
     setNewYear('');
+    setModalError('');
   };
 
   // Helper to open edit modal
   const openEditModal = (yearObj) => {
     setEditingYear(yearObj);
     setEditYear(yearObj.year);
+    setModalError('');
   };
 
   // Helper to close edit modal and reset fields
   const closeEditModal = () => {
     setEditingYear(null);
     setEditYear('');
+    setModalError('');
   };
 
   // Fetch years on mount
@@ -61,8 +66,8 @@ const Years = ({ user, onLogout }) => {
         const data = await response.json();
         
         if (response.ok && data) {
-          // If response is a direct list of years
-          const mapped = data.map(item => ({
+          const list = Array.isArray(data) ? data : (data.data || []);
+          const mapped = list.map(item => ({
             id: item.id,
             year: item.year
           }));
@@ -87,7 +92,7 @@ const Years = ({ user, onLogout }) => {
   const handleCreateYear = async (e) => {
     e.preventDefault();
     if (!newYear) {
-      alert('Por favor ingrese el año.');
+      setModalError('Por favor ingrese el año.');
       return;
     }
 
@@ -114,7 +119,7 @@ const Years = ({ user, onLogout }) => {
         throw new Error(data.message || 'Error al crear el año.');
       }
 
-      const created = data;
+      const created = data.data || data;
       const newYearObj = {
         id: created.id,
         year: created.year
@@ -124,8 +129,25 @@ const Years = ({ user, onLogout }) => {
       setYears([newYearObj, ...years].sort((a, b) => b.year - a.year));
       closeModal();
 
+      // Show success toast
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Año creado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar crear el año.');
+      setModalError(err.message || 'Error de conexión al intentar crear el año.');
     }
   };
 
@@ -133,7 +155,7 @@ const Years = ({ user, onLogout }) => {
   const handleUpdateYear = async (e) => {
     e.preventDefault();
     if (!editYear) {
-      alert('Por favor ingrese el año.');
+      setModalError('Por favor ingrese el año.');
       return;
     }
 
@@ -160,7 +182,7 @@ const Years = ({ user, onLogout }) => {
         throw new Error(data.message || 'Error al actualizar el año.');
       }
 
-      const updated = data;
+      const updated = data.data || data;
       const updatedList = years.map(item => {
         if (item.id === editingYear.id) {
           return {
@@ -174,8 +196,25 @@ const Years = ({ user, onLogout }) => {
       setYears(updatedList);
       closeEditModal();
 
+      // Show success toast
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Año actualizado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar actualizar el año.');
+      setModalError(err.message || 'Error de conexión al intentar actualizar el año.');
     }
   };
 
@@ -660,6 +699,20 @@ const Years = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Year field */}
                 <div className="input-group">
                   <label htmlFor="year-val" className="input-label">
@@ -759,6 +812,20 @@ const Years = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Year field */}
                 <div className="input-group">
                   <label htmlFor="edit-year-val" className="input-label">

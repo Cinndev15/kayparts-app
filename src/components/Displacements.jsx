@@ -5,12 +5,14 @@ import {
   HelpCircle, Edit2
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Swal from 'sweetalert2';
 
 const Displacements = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   // Form states for creating a new displacement
   const [newName, setNewName] = useState('');
@@ -31,18 +33,21 @@ const Displacements = ({ user, onLogout }) => {
   const closeModal = () => {
     setIsModalOpen(false);
     setNewName('');
+    setModalError('');
   };
 
   // Helper to open edit modal
   const openEditModal = (disp) => {
     setEditingDisplacement(disp);
     setEditName(disp.name);
+    setModalError('');
   };
 
   // Helper to close edit modal and reset fields
   const closeEditModal = () => {
     setEditingDisplacement(null);
     setEditName('');
+    setModalError('');
   };
 
   // Fetch displacements on mount
@@ -61,7 +66,8 @@ const Displacements = ({ user, onLogout }) => {
         const data = await response.json();
         
         if (response.ok && data) {
-          const mapped = data.map(item => ({
+          const list = Array.isArray(data) ? data : (data.data || []);
+          const mapped = list.map(item => ({
             id: item.id,
             name: item.name
           }));
@@ -86,7 +92,7 @@ const Displacements = ({ user, onLogout }) => {
   const handleCreateDisplacement = async (e) => {
     e.preventDefault();
     if (!newName.trim()) {
-      alert('Por favor ingrese el cilindraje.');
+      setModalError('Por favor ingrese el cilindraje.');
       return;
     }
 
@@ -113,7 +119,7 @@ const Displacements = ({ user, onLogout }) => {
         throw new Error(data.message || 'Error al crear el cilindraje.');
       }
 
-      const created = data;
+      const created = data.data || data;
       const newDisp = {
         id: created.id,
         name: created.name
@@ -122,8 +128,25 @@ const Displacements = ({ user, onLogout }) => {
       setDisplacements([newDisp, ...displacements].sort((a, b) => a.name.localeCompare(b.name)));
       closeModal();
 
+      // Show success toast
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Cilindraje creado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar crear el cilindraje.');
+      setModalError(err.message || 'Error de conexión al intentar crear el cilindraje.');
     }
   };
 
@@ -131,7 +154,7 @@ const Displacements = ({ user, onLogout }) => {
   const handleUpdateDisplacement = async (e) => {
     e.preventDefault();
     if (!editName.trim()) {
-      alert('Por favor ingrese el cilindraje.');
+      setModalError('Por favor ingrese el cilindraje.');
       return;
     }
 
@@ -158,7 +181,7 @@ const Displacements = ({ user, onLogout }) => {
         throw new Error(data.message || 'Error al actualizar el cilindraje.');
       }
 
-      const updated = data;
+      const updated = data.data || data;
       const updatedList = displacements.map(item => {
         if (item.id === editingDisplacement.id) {
           return {
@@ -172,8 +195,25 @@ const Displacements = ({ user, onLogout }) => {
       setDisplacements(updatedList);
       closeEditModal();
 
+      // Show success toast
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Cilindraje actualizado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar actualizar el cilindraje.');
+      setModalError(err.message || 'Error de conexión al intentar actualizar el cilindraje.');
     }
   };
 
@@ -658,6 +698,20 @@ const Displacements = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Displacement Name field */}
                 <div className="input-group">
                   <label htmlFor="disp-name" className="input-label">
@@ -755,6 +809,20 @@ const Displacements = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Displacement Name field */}
                 <div className="input-group">
                   <label htmlFor="edit-disp-name" className="input-label">
