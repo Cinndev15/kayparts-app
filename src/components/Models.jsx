@@ -578,7 +578,6 @@ const Models = ({ user, onLogout }) => {
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', width: '100px' }}>IMAGEN</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>NOMBRE</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>MARCA</th>
-                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>RANGO AÑOS</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>DESCRIPCIÓN</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ESTADO</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', textAlign: 'center', width: '120px' }}>ACCIONES</th>
@@ -587,7 +586,7 @@ const Models = ({ user, onLogout }) => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
                       Cargando modelos...
                     </td>
                   </tr>
@@ -625,11 +624,6 @@ const Models = ({ user, onLogout }) => {
                       {/* Brand column */}
                       <td style={{ padding: '20px 24px', fontSize: '13px', color: '#1e293b', fontWeight: '500' }}>
                         {model.brand_name}
-                      </td>
-
-                      {/* Years range column */}
-                      <td style={{ padding: '20px 24px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>
-                        {model.year_from || 'N/A'} - {model.year_to || 'N/A'}
                       </td>
 
                       {/* Description column */}
@@ -675,7 +669,7 @@ const Models = ({ user, onLogout }) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
                       No se encontraron modelos que coincidan con la búsqueda.
                     </td>
                   </tr>
