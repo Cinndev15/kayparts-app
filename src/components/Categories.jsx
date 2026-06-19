@@ -15,6 +15,7 @@ const Categories = ({ user, onLogout }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   // Form states for creating a new category
   const [newName, setNewName] = useState('');
@@ -49,6 +50,7 @@ const Categories = ({ user, onLogout }) => {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+    setModalError('');
   };
 
   // Helper to open edit modal
@@ -58,6 +60,7 @@ const Categories = ({ user, onLogout }) => {
     setEditDesc(cat.description || '');
     setEditImgFile(null);
     setEditPreviewUrl(cat.image);
+    setModalError('');
   };
 
   // Helper to close edit modal and reset fields
@@ -72,6 +75,7 @@ const Categories = ({ user, onLogout }) => {
       URL.revokeObjectURL(editPreviewUrl);
     }
     setEditPreviewUrl(null);
+    setModalError('');
   };
 
   // Fetch categories from Laravel API on mount
@@ -114,14 +118,10 @@ const Categories = ({ user, onLogout }) => {
   const handleCreateCategory = async (e) => {
     e.preventDefault();
     if (!newName.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campo requerido',
-        text: 'Por favor ingrese el nombre de la categoría.',
-        confirmButtonColor: '#e21a22'
-      });
+      setModalError('Por favor ingrese el nombre de la categoría.');
       return;
     }
+    setModalError('');
 
     const token = localStorage.getItem('kayparts_token');
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
@@ -171,21 +171,25 @@ const Categories = ({ user, onLogout }) => {
       setCategories([newCategory, ...categories]);
       closeModal();
 
-      Swal.fire({
+      // Show beautiful success Toast instead of blocking overlay
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
         icon: 'success',
-        title: '¡Creado!',
-        text: 'La categoría ha sido creada correctamente.',
-        timer: 2000,
-        showConfirmButton: false
+        title: 'Categoría creada correctamente'
       });
 
     } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al crear',
-        text: err.message || 'Error de conexión al intentar crear la categoría.',
-        confirmButtonColor: '#e21a22'
-      });
+      setModalError(err.message || 'Error de conexión al intentar crear la categoría.');
     }
   };
 
@@ -193,14 +197,10 @@ const Categories = ({ user, onLogout }) => {
   const handleUpdateCategory = async (e) => {
     e.preventDefault();
     if (!editName.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campo requerido',
-        text: 'Por favor ingrese el nombre de la categoría.',
-        confirmButtonColor: '#e21a22'
-      });
+      setModalError('Por favor ingrese el nombre de la categoría.');
       return;
     }
+    setModalError('');
 
     const token = localStorage.getItem('kayparts_token');
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
@@ -253,21 +253,25 @@ const Categories = ({ user, onLogout }) => {
       setCategories(updatedList);
       closeEditModal();
 
-      Swal.fire({
+      // Show beautiful success Toast instead of blocking overlay
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
         icon: 'success',
-        title: '¡Actualizado!',
-        text: 'La categoría ha sido actualizada correctamente.',
-        timer: 2000,
-        showConfirmButton: false
+        title: 'Categoría actualizada correctamente'
       });
 
     } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al actualizar',
-        text: err.message || 'Error de conexión al intentar actualizar la categoría.',
-        confirmButtonColor: '#e21a22'
-      });
+      setModalError(err.message || 'Error de conexión al intentar actualizar la categoría.');
     }
   };
 
@@ -860,6 +864,20 @@ const Categories = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Category Name */}
                 <div className="input-group">
                   <label htmlFor="cat-name" className="input-label">
@@ -1113,6 +1131,20 @@ const Categories = ({ user, onLogout }) => {
                 flexDirection: 'column',
                 gap: '18px'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Category Name */}
                 <div className="input-group">
                   <label htmlFor="edit-cat-name" className="input-label">
