@@ -454,8 +454,8 @@ const Products = ({ user, onLogout }) => {
 
     // Append new uploaded images
     newImageFiles.forEach((img, idx) => {
-      bodyFormData.append('images[]', img.file);
-      bodyFormData.append('image_labels[]', img.label);
+      bodyFormData.append('images', img.file);
+      bodyFormData.append('image_labels', img.label);
     });
 
     // Handle primary image index relative to new files uploaded
