@@ -58,7 +58,8 @@ const Taxes = ({ user, onLogout }) => {
       const data = await response.json();
       
       if (response.ok && data) {
-        setTaxes(data);
+        const list = Array.isArray(data) ? data : (data.data || []);
+        setTaxes(list);
       } else {
         console.error('Error fetching taxes:', data);
       }
