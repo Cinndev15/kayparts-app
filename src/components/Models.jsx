@@ -5,12 +5,14 @@ import {
   HelpCircle, Trash2, Edit2, UploadCloud
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Swal from 'sweetalert2';
 
 const Models = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalError, setModalError] = useState('');
 
   // Form states for creating a new model
   const [newName, setNewName] = useState('');
@@ -60,6 +62,7 @@ const Models = ({ user, onLogout }) => {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+    setModalError('');
   };
 
   // Helper to open edit modal
@@ -73,6 +76,7 @@ const Models = ({ user, onLogout }) => {
     setEditIsActive(model.is_active ? '1' : '0');
     setEditImgFile(null);
     setEditPreviewUrl(model.image);
+    setModalError('');
   };
 
   // Helper to close edit modal and reset fields
@@ -89,6 +93,7 @@ const Models = ({ user, onLogout }) => {
       URL.revokeObjectURL(editPreviewUrl);
     }
     setEditPreviewUrl(null);
+    setModalError('');
   };
 
   // Fetch models & brands on mount
@@ -151,11 +156,11 @@ const Models = ({ user, onLogout }) => {
   const handleCreateModel = async (e) => {
     e.preventDefault();
     if (!newName.trim()) {
-      alert('Por favor ingrese el nombre del modelo.');
+      setModalError('Por favor ingrese el nombre del modelo.');
       return;
     }
     if (!newBrandId) {
-      alert('Por favor seleccione una marca.');
+      setModalError('Por favor seleccione una marca.');
       return;
     }
 
@@ -202,7 +207,7 @@ const Models = ({ user, onLogout }) => {
         image: created.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
         name: created.name,
         brand_id: created.brand_id,
-        brand_name: created.brand_name || 'Sin marca',
+        brand_name: brands.find(b => b.id === parseInt(created.brand_id))?.name || created.brand_name || 'Sin marca',
         year_from: created.year_from || '',
         year_to: created.year_to || '',
         description: created.description || '',
@@ -212,8 +217,25 @@ const Models = ({ user, onLogout }) => {
       setModels([newModel, ...models]);
       closeModal();
 
+      // Show beautiful success Toast instead of blocking overlay
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Modelo creado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar crear el modelo.');
+      setModalError(err.message || 'Error de conexión al intentar crear el modelo.');
     }
   };
 
@@ -221,11 +243,11 @@ const Models = ({ user, onLogout }) => {
   const handleUpdateModel = async (e) => {
     e.preventDefault();
     if (!editName.trim()) {
-      alert('Por favor ingrese el nombre del modelo.');
+      setModalError('Por favor ingrese el nombre del modelo.');
       return;
     }
     if (!editBrandId) {
-      alert('Por favor seleccione una marca.');
+      setModalError('Por favor seleccione una marca.');
       return;
     }
 
@@ -275,7 +297,7 @@ const Models = ({ user, onLogout }) => {
             ...m,
             name: updated.name,
             brand_id: updated.brand_id,
-            brand_name: updated.brand_name || 'Sin marca',
+            brand_name: brands.find(b => b.id === parseInt(updated.brand_id))?.name || updated.brand_name || 'Sin marca',
             year_from: updated.year_from || '',
             year_to: updated.year_to || '',
             description: updated.description || '',
@@ -289,8 +311,25 @@ const Models = ({ user, onLogout }) => {
       setModels(updatedList);
       closeEditModal();
 
+      // Show beautiful success Toast instead of blocking overlay
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Modelo actualizado correctamente'
+      });
+
     } catch (err) {
-      alert(err.message || 'Error de conexión al intentar actualizar el modelo.');
+      setModalError(err.message || 'Error de conexión al intentar actualizar el modelo.');
     }
   };
 
@@ -832,6 +871,20 @@ const Models = ({ user, onLogout }) => {
                 maxHeight: '60vh',
                 overflowY: 'auto'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Model Name */}
                 <div className="input-group">
                   <label htmlFor="model-name" className="input-label">
@@ -1124,6 +1177,20 @@ const Models = ({ user, onLogout }) => {
                 maxHeight: '60vh',
                 overflowY: 'auto'
               }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
                 {/* Model Name */}
                 <div className="input-group">
                   <label htmlFor="edit-model-name" className="input-label">
