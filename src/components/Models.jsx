@@ -873,39 +873,7 @@ const Models = ({ user, onLogout }) => {
                   </select>
                 </div>
 
-                {/* Range of Years (Year From and Year To) */}
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div className="input-group">
-                    <label htmlFor="model-year-from" className="input-label">
-                      Año Inicial
-                    </label>
-                    <input
-                      id="model-year-from"
-                      type="number"
-                      placeholder="Ej. 2015"
-                      value={newYearFrom}
-                      onChange={(e) => setNewYearFrom(e.target.value)}
-                      className="input-control"
-                      min="1900"
-                      max="2100"
-                    />
-                  </div>
-                  <div className="input-group">
-                    <label htmlFor="model-year-to" className="input-label">
-                      Año Final
-                    </label>
-                    <input
-                      id="model-year-to"
-                      type="number"
-                      placeholder="Ej. 2024"
-                      value={newYearTo}
-                      onChange={(e) => setNewYearTo(e.target.value)}
-                      className="input-control"
-                      min="1900"
-                      max="2100"
-                    />
-                  </div>
-                </div>
+
 
                 {/* Description */}
                 <div className="input-group">
@@ -1197,39 +1165,7 @@ const Models = ({ user, onLogout }) => {
                   </select>
                 </div>
 
-                {/* Range of Years */}
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div className="input-group">
-                    <label htmlFor="edit-model-year-from" className="input-label">
-                      Año Inicial
-                    </label>
-                    <input
-                      id="edit-model-year-from"
-                      type="number"
-                      placeholder="Ej. 2015"
-                      value={editYearFrom}
-                      onChange={(e) => setEditYearFrom(e.target.value)}
-                      className="input-control"
-                      min="1900"
-                      max="2100"
-                    />
-                  </div>
-                  <div className="input-group">
-                    <label htmlFor="edit-model-year-to" className="input-label">
-                      Año Final
-                    </label>
-                    <input
-                      id="edit-model-year-to"
-                      type="number"
-                      placeholder="Ej. 2024"
-                      value={editYearTo}
-                      onChange={(e) => setEditYearTo(e.target.value)}
-                      className="input-control"
-                      min="1900"
-                      max="2100"
-                    />
-                  </div>
-                </div>
+
 
                 {/* Description */}
                 <div className="input-group">
