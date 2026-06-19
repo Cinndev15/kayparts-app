@@ -154,7 +154,7 @@ const Categories = ({ user, onLogout }) => {
             throw new Error(data.errors[firstField][0]);
           }
         }
-        throw new Error(data.message || 'Error al crear la categoría.');
+        throw new Error(data.error || data.message || 'Error al crear la categoría.');
       }
 
       const createdCategory = data.data;
@@ -233,7 +233,7 @@ const Categories = ({ user, onLogout }) => {
             throw new Error(data.errors[firstField][0]);
           }
         }
-        throw new Error(data.message || 'Error al actualizar la categoría.');
+        throw new Error(data.error || data.message || 'Error al actualizar la categoría.');
       }
 
       const updatedCategory = data.data;
@@ -316,7 +316,7 @@ const Categories = ({ user, onLogout }) => {
           Swal.fire({
             icon: 'error',
             title: 'Error al eliminar',
-            text: data.message || 'Error al eliminar la categoría.',
+            text: data.error || data.message || 'Error al eliminar la categoría.',
             confirmButtonColor: '#e21a22'
           });
         }
