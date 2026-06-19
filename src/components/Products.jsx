@@ -5,6 +5,7 @@ import {
   HelpCircle, Trash2, Edit2, UploadCloud, Info, Package, Star, ArrowRight, X
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Swal from 'sweetalert2';
 
 const Products = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Products = ({ user, onLogout }) => {
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [modalError, setModalError] = useState('');
   
   // Sub-tabs inside the Create/Edit modal
   // Options: 'general', 'technical', 'compatibility', 'images'
@@ -128,21 +130,21 @@ const Products = ({ user, onLogout }) => {
       const yearRes = await fetch(`${apiUrl}/vehicle-years`, { headers });
       const yearData = await yearRes.json();
       if (yearRes.ok && yearData) {
-        setVehicleYears(yearData);
+        setVehicleYears(yearData.data || yearData);
       }
 
       // Fetch vehicle displacements
       const dispRes = await fetch(`${apiUrl}/vehicle-displacements`, { headers });
       const dispData = await dispRes.json();
       if (dispRes.ok && dispData) {
-        setVehicleDisplacements(dispData);
+        setVehicleDisplacements(dispData.data || dispData);
       }
 
       // Fetch taxes
       const taxRes = await fetch(`${apiUrl}/taxes`, { headers });
       const taxData = await taxRes.json();
       if (taxRes.ok && taxData) {
-        setTaxes(taxData);
+        setTaxes(taxData.data || taxData);
       }
 
     } catch (err) {
@@ -202,6 +204,7 @@ const Products = ({ user, onLogout }) => {
     setSelectedTaxes([]);
     setNewImageFiles([]);
     setExistingImages([]);
+    setModalError('');
     setIsModalOpen(true);
   };
 
@@ -212,6 +215,7 @@ const Products = ({ user, onLogout }) => {
       URL.revokeObjectURL(img.previewUrl);
     });
     setNewImageFiles([]);
+    setModalError('');
   };
 
   // Helper to open edit modal
@@ -238,9 +242,9 @@ const Products = ({ user, onLogout }) => {
           description: fullProduct.description || '',
           price: fullProduct.price ? fullProduct.price.toString() : '',
           stock: fullProduct.stock ? fullProduct.stock.toString() : '',
-          brand_id: fullProduct.brand ? fullProduct.brand.id.toString() : '',
-          category_id: fullProduct.category ? fullProduct.category.id.toString() : '',
-          subcategory_id: fullProduct.subcategory ? fullProduct.subcategory.id.toString() : '',
+          brand_id: fullProduct.brand_id ? fullProduct.brand_id.toString() : '',
+          category_id: fullProduct.category_id ? fullProduct.category_id.toString() : '',
+          subcategory_id: fullProduct.subcategory_id ? fullProduct.subcategory_id.toString() : '',
           status: fullProduct.status || 'active',
           condition: fullProduct.condition || 'new',
           spare_type: fullProduct.spare_type || '',
@@ -252,9 +256,9 @@ const Products = ({ user, onLogout }) => {
         });
 
         // Populate pivot arrays (extracting numeric IDs)
-        setSelectedModels(fullProduct.vehicle_models ? fullProduct.vehicle_models.map(m => m.id) : []);
-        setSelectedYears(fullProduct.vehicle_years ? fullProduct.vehicle_years.map(y => y.id) : []);
-        setSelectedDisplacements(fullProduct.vehicle_displacements ? fullProduct.vehicle_displacements.map(d => d.id) : []);
+        setSelectedModels(fullProduct.vehicleModels ? fullProduct.vehicleModels.map(m => m.id) : (fullProduct.vehicle_models ? fullProduct.vehicle_models.map(m => m.id) : []));
+        setSelectedYears(fullProduct.vehicleYears ? fullProduct.vehicleYears.map(y => y.id) : (fullProduct.vehicle_years ? fullProduct.vehicle_years.map(y => y.id) : []));
+        setSelectedDisplacements(fullProduct.vehicleDisplacements ? fullProduct.vehicleDisplacements.map(d => d.id) : (fullProduct.vehicle_displacements ? fullProduct.vehicle_displacements.map(d => d.id) : []));
         setSelectedTaxes(fullProduct.taxes ? fullProduct.taxes.map(t => t.id) : []);
         
         // Populate existing images
@@ -262,17 +266,28 @@ const Products = ({ user, onLogout }) => {
           id: img.id,
           image_url: img.image_url,
           label: img.label || 'OTRA',
-          is_principal: !!img.is_principal
+          is_principal: !!img.is_primary || !!img.is_principal
         })) : []);
 
         setNewImageFiles([]);
-        setIsModalOpen(false); // Make sure create is closed
+        setModalError('');
+        setIsModalOpen(true); 
       } else {
-        alert('No se pudieron recuperar los detalles del producto.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron recuperar los detalles del producto.',
+          confirmButtonColor: '#e21a22'
+        });
       }
     } catch (err) {
       console.error('Error fetching product details:', err);
-      alert('Error de conexión al cargar los detalles del producto.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de conexión',
+        text: 'Error de conexión al cargar los detalles del producto.',
+        confirmButtonColor: '#e21a22'
+      });
     }
   };
 
@@ -283,6 +298,7 @@ const Products = ({ user, onLogout }) => {
       URL.revokeObjectURL(img.previewUrl);
     });
     setNewImageFiles([]);
+    setModalError('');
   };
 
   // Toggle checks in list arrays
@@ -376,23 +392,23 @@ const Products = ({ user, onLogout }) => {
 
     // Basic validation
     if (!formData.sku.trim()) {
-      alert('Por favor ingrese el código SKU del producto.');
+      setModalError('Por favor ingrese el código SKU del producto.');
       return;
     }
     if (!formData.name.trim()) {
-      alert('Por favor ingrese el nombre del producto.');
+      setModalError('Por favor ingrese el nombre del producto.');
       return;
     }
     if (!formData.price || isNaN(formData.price)) {
-      alert('Por favor ingrese un precio numérico válido.');
+      setModalError('Por favor ingrese un precio numérico válido.');
       return;
     }
     if (!formData.stock || isNaN(formData.stock)) {
-      alert('Por favor ingrese una cantidad de stock válida.');
+      setModalError('Por favor ingrese una cantidad de stock válida.');
       return;
     }
     if (!formData.category_id) {
-      alert('Por favor seleccione la categoría del producto.');
+      setModalError('Por favor seleccione la categoría del producto.');
       return;
     }
 
@@ -447,17 +463,14 @@ const Products = ({ user, onLogout }) => {
     if (primaryIndexInQueue !== -1) {
       bodyFormData.append('principal_image_index', primaryIndexInQueue);
     } else {
-      // If no new image is primary, we specify -1
       bodyFormData.append('principal_image_index', -1);
     }
 
-    // Wait! What if we edited and selected an existing image as primary?
-    // We should notify the backend. The backend controller says:
-    // If principalIndex !== -1, it resets primary.
-    // Wait, the backend doesn't have a direct route to update existing image properties in `ProductController.php`.
-    // But since the primary image is stored in the database, setting the new one resets it.
-    // If the user selected an existing one as primary, we can just send it as part of our update payload or it will remain.
-    // That is perfectly fine.
+    // Existing primary file id to preserve primary setting if no new file is set as primary
+    const existingPrimary = existingImages.find(img => img.is_principal);
+    if (existingPrimary) {
+      bodyFormData.append('existing_principal_image_id', existingPrimary.id);
+    }
 
     try {
       const response = await fetch(url, {
@@ -481,18 +494,34 @@ const Products = ({ user, onLogout }) => {
         throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el producto.`);
       }
 
-      alert(`Producto ${isEdit ? 'actualizado' : 'creado'} exitosamente.`);
-      
       // Close modal and reload data
       if (isEdit) {
         closeEditModal();
       } else {
         closeModal();
       }
+      
+      // Show success toast
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      Toast.fire({
+        icon: 'success',
+        title: `Producto ${isEdit ? 'actualizado' : 'creado'} correctamente.`
+      });
+
       fetchMasterData();
 
     } catch (err) {
-      alert(err.message || 'Error al enviar la solicitud al servidor.');
+      setModalError(err.message || 'Error al enviar la solicitud al servidor.');
     }
   };
 
@@ -1164,6 +1193,21 @@ const Products = ({ user, onLogout }) => {
               
               {/* Main scrollable body */}
               <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left',
+                    marginBottom: '20px'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
 
                 {/* TAB 1: GENERAL INFO */}
                 {activeFormTab === 'general' && (
