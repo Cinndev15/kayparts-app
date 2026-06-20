@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LogOut, ChevronDown, PlusCircle,
-  HelpCircle, Edit2, Users, CheckCircle2, AlertTriangle, XCircle
+  HelpCircle, Edit2, Users, CheckCircle2, AlertTriangle, XCircle, MapPin
 } from 'lucide-react';
 import Logo from './Logo';
 import Sidebar from './Sidebar';
@@ -14,6 +14,7 @@ const Clients = ({ user, onLogout }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [viewingAddressesClient, setViewingAddressesClient] = useState(null);
 
   // Success/Error notifications
   const [successMessage, setSuccessMessage] = useState('');
@@ -683,34 +684,64 @@ const Clients = ({ user, onLogout }) => {
                         padding: '12px 24px',
                         textAlign: 'center'
                       }}>
-                        <button
-                          onClick={() => openEditModal(client)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            border: '1px solid #cbd5e1',
-                            backgroundColor: '#ffffff',
-                            color: '#475569',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: '600',
-                            transition: 'all 0.15s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#0f172a';
-                            e.currentTarget.style.color = '#0f172a';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#cbd5e1';
-                            e.currentTarget.style.color = '#475569';
-                          }}
-                        >
-                          <Edit2 size={13} />
-                          Editar
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => setViewingAddressesClient(client)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#ffffff',
+                              color: '#475569',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              transition: 'all 0.15s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#0f172a';
+                              e.currentTarget.style.color = '#0f172a';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.color = '#475569';
+                            }}
+                          >
+                            <MapPin size={13} />
+                            Direcciones
+                          </button>
+                          <button
+                            onClick={() => openEditModal(client)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#ffffff',
+                              color: '#475569',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              transition: 'all 0.15s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#0f172a';
+                              e.currentTarget.style.color = '#0f172a';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.color = '#475569';
+                            }}
+                          >
+                            <Edit2 size={13} />
+                            Editar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -1178,6 +1209,197 @@ const Clients = ({ user, onLogout }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. MODAL POPUP (Ver Direcciones) */}
+      {viewingAddressesClient && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+        }}>
+          
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '600px',
+            boxShadow: 'var(--shadow-premium)',
+            overflow: 'hidden',
+            animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '85vh'
+          }}>
+            
+            {/* Modal Header */}
+            <div style={{
+              padding: '24px 24px 16px 24px',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h2 className="title-font" style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: '#0f172a'
+                }}>
+                  Direcciones Registradas
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+                  Cliente: <strong style={{ color: '#1e293b' }}>{viewingAddressesClient.name}</strong> ({viewingAddressesClient.email})
+                </p>
+              </div>
+              <button
+                onClick={() => setViewingAddressesClient(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  color: '#94a3b8'
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Address List Content */}
+            <div style={{
+              padding: '24px',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              {!viewingAddressesClient.addresses || viewingAddressesClient.addresses.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#64748b'
+                }}>
+                  <MapPin size={36} style={{ color: '#cbd5e1', marginBottom: '12px' }} />
+                  <p style={{ fontSize: '14px', fontWeight: '500' }}>Este cliente no tiene direcciones registradas.</p>
+                </div>
+              ) : (
+                viewingAddressesClient.addresses.map((address) => (
+                  <div
+                    key={address.id}
+                    style={{
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      backgroundColor: address.is_primary ? '#f8fafc' : '#ffffff',
+                      borderLeft: address.is_primary ? '4px solid #e21a22' : '1px solid #e2e8f0',
+                      position: 'relative',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {/* Primary Badge */}
+                    {address.is_primary && (
+                      <span style={{
+                        position: 'absolute',
+                        top: '16px',
+                        right: '16px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        backgroundColor: '#fee2e2',
+                        color: '#e21a22',
+                        padding: '2px 8px',
+                        borderRadius: '9999px'
+                      }}>
+                        Principal
+                      </span>
+                    )}
+
+                    {/* Alias / Title */}
+                    <h4 style={{
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      color: '#0f172a',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <MapPin size={14} style={{ color: '#e21a22' }} />
+                      {address.alias || 'Dirección'}
+                    </h4>
+
+                    {/* Recipient */}
+                    <div style={{ fontSize: '13px', color: '#334155', marginBottom: '4px' }}>
+                      <strong>Destinatario:</strong> {address.recipient_name} ({address.phone})
+                    </div>
+
+                    {/* Address Line 1 */}
+                    <div style={{ fontSize: '13px', color: '#334155', marginBottom: '4px' }}>
+                      <strong>Dirección:</strong> {address.address_line_1}
+                      {address.address_line_2 && ` - ${address.address_line_2}`}
+                    </div>
+
+                    {/* Department / City */}
+                    <div style={{ fontSize: '13px', color: '#334155', marginBottom: '4px' }}>
+                      <strong>Ciudad/Depto:</strong> {address.city}, {address.department}
+                    </div>
+
+                    {/* Additional Info */}
+                    {address.additional_info && (
+                      <div style={{
+                        fontSize: '12px',
+                        color: '#64748b',
+                        fontStyle: 'italic',
+                        marginTop: '8px',
+                        backgroundColor: '#f1f5f9',
+                        padding: '6px 10px',
+                        borderRadius: '6px'
+                      }}>
+                        <strong>Info adicional:</strong> {address.additional_info}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              padding: '16px 24px',
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              backgroundColor: '#f8fafc'
+            }}>
+              <button
+                type="button"
+                onClick={() => setViewingAddressesClient(null)}
+                style={{
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: '#475569',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: '600'
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
