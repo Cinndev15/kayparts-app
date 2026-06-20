@@ -74,7 +74,7 @@ const Clients = ({ user, onLogout }) => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
     try {
-      const response = await fetch(`${apiUrl}/clients`, {
+      const response = await fetch(`${apiUrl}/users`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
@@ -120,7 +120,7 @@ const Clients = ({ user, onLogout }) => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
     try {
-      const response = await fetch(`${apiUrl}/clients`, {
+      const response = await fetch(`${apiUrl}/users`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -181,7 +181,7 @@ const Clients = ({ user, onLogout }) => {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/clients/${editingClient.id}`, {
+      const response = await fetch(`${apiUrl}/users/${editingClient.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
