@@ -211,10 +211,14 @@ const Products = ({ user, onLogout }) => {
   // Helper to close creation modal and clean resource URLs
   const closeModal = () => {
     setIsModalOpen(false);
+    setEditingProduct(null);
     newImageFiles.forEach(img => {
-      URL.revokeObjectURL(img.previewUrl);
+      if (img.previewUrl) {
+        URL.revokeObjectURL(img.previewUrl);
+      }
     });
     setNewImageFiles([]);
+    setExistingImages([]);
     setModalError('');
   };
 
@@ -294,10 +298,14 @@ const Products = ({ user, onLogout }) => {
   // Helper to close edit modal
   const closeEditModal = () => {
     setEditingProduct(null);
+    setIsModalOpen(false);
     newImageFiles.forEach(img => {
-      URL.revokeObjectURL(img.previewUrl);
+      if (img.previewUrl) {
+        URL.revokeObjectURL(img.previewUrl);
+      }
     });
     setNewImageFiles([]);
+    setExistingImages([]);
     setModalError('');
   };
 
