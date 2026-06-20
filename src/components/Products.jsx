@@ -79,7 +79,7 @@ const Products = ({ user, onLogout }) => {
   // Structure: { id, image_url, label, is_principal: boolean }
   const [existingImages, setExistingImages] = useState([]);
 
-  // Fetch all master data on mount
+  // Fetch all master data on mount in parallel
   const fetchMasterData = async () => {
     setLoading(true);
     const token = localStorage.getItem('kayparts_token');
@@ -91,61 +91,47 @@ const Products = ({ user, onLogout }) => {
         'Accept': 'application/json'
       };
 
-      // Fetch products list
-      const prodRes = await fetch(`${apiUrl}/products?per_page=100`, { headers });
-      const prodData = await prodRes.json();
-      if (prodRes.ok && prodData.data) {
-        setProducts(prodData.data);
-      }
+      const safeFetch = async (endpoint) => {
+        try {
+          const res = await fetch(`${apiUrl}/${endpoint}`, { headers });
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.error(`Error fetching ${endpoint}:`, err);
+        }
+        return null;
+      };
 
-      // Fetch categories
-      const catRes = await fetch(`${apiUrl}/categories`, { headers });
-      const catData = await catRes.json();
-      if (catRes.ok && catData.data) {
-        setCategories(catData.data);
-      }
+      // Dispatch all requests concurrently
+      const [
+        prodData,
+        catData,
+        subData,
+        brandData,
+        modelData,
+        yearData,
+        dispData,
+        taxData
+      ] = await Promise.all([
+        safeFetch('products?per_page=100'),
+        safeFetch('categories'),
+        safeFetch('subcategories'),
+        safeFetch('product-brands'),
+        safeFetch('vehicle-models'),
+        safeFetch('vehicle-years'),
+        safeFetch('vehicle-displacements'),
+        safeFetch('taxes')
+      ]);
 
-      // Fetch subcategories
-      const subRes = await fetch(`${apiUrl}/subcategories`, { headers });
-      const subData = await subRes.json();
-      if (subRes.ok && subData.data) {
-        setSubcategories(subData.data);
-      }
-
-      // Fetch product brands
-      const brandRes = await fetch(`${apiUrl}/product-brands`, { headers });
-      const brandData = await brandRes.json();
-      if (brandRes.ok && brandData.data) {
-        setProductBrands(brandData.data);
-      }
-
-      // Fetch vehicle models
-      const modelRes = await fetch(`${apiUrl}/vehicle-models`, { headers });
-      const modelData = await modelRes.json();
-      if (modelRes.ok && modelData.data) {
-        setVehicleModels(modelData.data);
-      }
-
-      // Fetch vehicle years
-      const yearRes = await fetch(`${apiUrl}/vehicle-years`, { headers });
-      const yearData = await yearRes.json();
-      if (yearRes.ok && yearData) {
-        setVehicleYears(yearData.data || yearData);
-      }
-
-      // Fetch vehicle displacements
-      const dispRes = await fetch(`${apiUrl}/vehicle-displacements`, { headers });
-      const dispData = await dispRes.json();
-      if (dispRes.ok && dispData) {
-        setVehicleDisplacements(dispData.data || dispData);
-      }
-
-      // Fetch taxes
-      const taxRes = await fetch(`${apiUrl}/taxes`, { headers });
-      const taxData = await taxRes.json();
-      if (taxRes.ok && taxData) {
-        setTaxes(taxData.data || taxData);
-      }
+      if (prodData && prodData.data) setProducts(prodData.data);
+      if (catData && catData.data) setCategories(catData.data);
+      if (subData && subData.data) setSubcategories(subData.data);
+      if (brandData && brandData.data) setProductBrands(brandData.data);
+      if (modelData && modelData.data) setVehicleModels(modelData.data);
+      if (yearData) setVehicleYears(yearData.data || yearData);
+      if (dispData) setVehicleDisplacements(dispData.data || dispData);
+      if (taxData) setTaxes(taxData.data || taxData);
 
     } catch (err) {
       console.error('Error fetching master data:', err);
