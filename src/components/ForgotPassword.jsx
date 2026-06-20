@@ -37,7 +37,7 @@ const ForgotPassword = () => {
       if (response.ok) {
         setSubmitted(true);
       } else {
-        setError(data.message || 'No se pudo enviar el correo de recuperación.');
+        setError(data.error || data.message || 'No se pudo enviar el correo de recuperación.');
       }
     } catch (err) {
       console.error('Error sending reset link:', err);
