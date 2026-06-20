@@ -328,38 +328,6 @@ const Login = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          {/* Maintenance Notice Box */}
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            backgroundColor: '#f1f5f9',
-            borderRadius: '6px',
-            padding: '16px',
-            width: '100%',
-            marginTop: '32px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <Info size={18} style={{ color: '#475569', flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ textAlign: 'left' }}>
-              <p className="mono-font" style={{
-                fontSize: '10px',
-                fontWeight: '800',
-                color: '#1e293b',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                marginBottom: '4px'
-              }}>
-                Mantenimiento del Sistema
-              </p>
-              <p style={{
-                fontSize: '12px',
-                color: '#475569',
-                lineHeight: '1.45'
-              }}>
-                Optimización de base de datos programada para las 22:00 GMT. El rendimiento puede variar.
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Footer Area */}
@@ -383,7 +351,7 @@ const Login = ({ onLoginSuccess }) => {
             <a href="#" onClick={(e) => e.preventDefault()} style={{ color: '#64748b', textDecoration: 'none' }}>Privacidad</a>
           </div>
           <div className="mono-font" style={{ textAlign: 'right' }}>
-            <span>© 2024 Kayparts Industrial S.A.S. </span>
+            <span>© 2026 Kayparts S.A.S. </span>
             <span style={{ color: '#94a3b8', marginLeft: '6px' }}>NODO SEGURO: 41.22.88.LX</span>
           </div>
         </div>

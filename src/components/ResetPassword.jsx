@@ -394,7 +394,7 @@ const ResetPassword = () => {
             <a href="#" onClick={(e) => e.preventDefault()} style={{ color: '#64748b', textDecoration: 'none' }}>Privacidad</a>
           </div>
           <div className="mono-font" style={{ textAlign: 'right' }}>
-            <span>© 2024 Kayparts Industrial S.A.S. </span>
+            <span>© 2026 Kayparts S.A.S. </span>
             <span style={{ color: '#94a3b8', marginLeft: '6px' }}>NODO SEGURO: 41.22.88.LX</span>
           </div>
         </div>
