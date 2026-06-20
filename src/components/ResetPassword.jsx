@@ -1,21 +1,47 @@
-import React, { useState } from 'react';
-import { Mail, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Lock, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Logo from './Logo';
 
-const ForgotPassword = () => {
+const ResetPassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
   const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    const tokenParam = searchParams.get('token');
+    if (emailParam && tokenParam) {
+      setEmail(emailParam);
+      setToken(tokenParam);
+    } else {
+      setError('Enlace de recuperación inválido o incompleto.');
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (email.trim() === '') {
-      setError('Por favor ingrese su correo electrónico.');
+
+    if (!email || !token) {
+      setError('Faltan parámetros indispensables (email/token) en la URL.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError('Las contraseñas no coinciden.');
       return;
     }
 
@@ -23,13 +49,18 @@ const ForgotPassword = () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
 
     try {
-      const response = await fetch(`${apiUrl}/forgot-password`, {
+      const response = await fetch(`${apiUrl}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ email: email.trim() })
+        body: JSON.stringify({
+          email: email,
+          token: token,
+          password: password,
+          password_confirmation: passwordConfirmation
+        })
       });
 
       const data = await response.json();
@@ -37,10 +68,10 @@ const ForgotPassword = () => {
       if (response.ok) {
         setSubmitted(true);
       } else {
-        setError(data.message || 'No se pudo enviar el correo de recuperación.');
+        setError(data.message || 'No se pudo restablecer la contraseña.');
       }
     } catch (err) {
-      console.error('Error sending reset link:', err);
+      console.error('Error resetting password:', err);
       setError('Error de conexión con el servidor. Por favor intente más tarde.');
     } finally {
       setLoading(false);
@@ -56,7 +87,7 @@ const ForgotPassword = () => {
       overflow: 'hidden'
     }}>
       
-      {/* LEFT COLUMN: Industrial Imagery & Slogans (Visible only on desktop, identical to Login) */}
+      {/* LEFT COLUMN: Industrial Imagery & Slogans (Visible only on desktop) */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -113,7 +144,7 @@ const ForgotPassword = () => {
               textTransform: 'uppercase',
               color: '#cbd5e1'
             }}>
-              Operaciones Globales Activas
+              Acceso Seguro Encriptado
             </span>
           </div>
 
@@ -168,7 +199,7 @@ const ForgotPassword = () => {
                   marginBottom: '6px',
                   letterSpacing: '-0.5px'
                 }}>
-                  Recuperar Contraseña
+                  Nueva Contraseña
                 </h1>
                 <p style={{
                   fontSize: '14px',
@@ -176,7 +207,7 @@ const ForgotPassword = () => {
                   fontWeight: '450',
                   lineHeight: '1.4'
                 }}>
-                  Ingresa tu correo electrónico corporativo y te enviaremos las instrucciones de recuperación.
+                  Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta corporativa.
                 </p>
               </div>
 
@@ -185,7 +216,7 @@ const ForgotPassword = () => {
                 <div style={{
                   width: '100%',
                   padding: '12px 16px',
-                  borderRadius: 'var(--radius-sm)',
+                  borderRadius: '6px',
                   backgroundColor: '#fef2f2',
                   border: '1px solid #fee2e2',
                   color: '#ef4444',
@@ -199,21 +230,51 @@ const ForgotPassword = () => {
 
               {/* Form */}
               <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '22px' }}>
-                {/* Corporate Email */}
+                {/* Email (Read Only Display) */}
+                <div className="input-group" style={{ opacity: 0.8 }}>
+                  <label className="input-label">Correo electrónico</label>
+                  <input
+                    type="text"
+                    value={email}
+                    className="input-control"
+                    disabled
+                    style={{ backgroundColor: '#f8fafc', cursor: 'not-allowed' }}
+                  />
+                </div>
+
+                {/* Password */}
                 <div className="input-group">
-                  <label htmlFor="email" className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Mail size={14} style={{ color: '#64748b' }} />
-                    Correo corporativo
+                  <label htmlFor="password" className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Lock size={14} style={{ color: '#64748b' }} />
+                    Nueva contraseña
                   </label>
                   <input
-                    id="email"
-                    type="email"
-                    placeholder="nombre@kayparts.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="password"
+                    type="password"
+                    placeholder="Mínimo 8 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="input-control"
                     required
-                    disabled={loading}
+                    disabled={loading || !token}
+                  />
+                </div>
+
+                {/* Password Confirmation */}
+                <div className="input-group">
+                  <label htmlFor="password_confirmation" className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Lock size={14} style={{ color: '#64748b' }} />
+                    Confirmar nueva contraseña
+                  </label>
+                  <input
+                    id="password_confirmation"
+                    type="password"
+                    placeholder="Repita la contraseña"
+                    value={passwordConfirmation}
+                    onChange={(e) => setPasswordConfirmation(e.target.value)}
+                    className="input-control"
+                    required
+                    disabled={loading || !token}
                   />
                 </div>
 
@@ -221,7 +282,7 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={loading}
+                  disabled={loading || !token}
                   style={{
                     width: '100%',
                     padding: '14px 20px',
@@ -231,9 +292,9 @@ const ForgotPassword = () => {
                     marginTop: '8px'
                   }}
                 >
-                  {loading ? 'Enviando...' : (
+                  {loading ? 'Procesando...' : (
                     <>
-                      Enviar Instrucciones <ArrowRight size={16} />
+                      Restablecer Contraseña <ArrowRight size={16} />
                     </>
                   )}
                 </button>
@@ -259,7 +320,7 @@ const ForgotPassword = () => {
                 color: '#0f172a',
                 marginBottom: '12px'
               }}>
-                Enlace Enviado
+                ¡Contraseña Restablecida!
               </h1>
               
               <p style={{
@@ -268,35 +329,43 @@ const ForgotPassword = () => {
                 lineHeight: '1.6',
                 marginBottom: '32px'
               }}>
-                Hemos enviado las instrucciones para restablecer tu contraseña al correo:<br />
-                <strong style={{ color: '#1e293b' }}>{email}</strong>.<br />
-                Revisa tu bandeja de entrada o la carpeta de correo no deseado.
+                Tu contraseña ha sido actualizada con éxito. Ya puedes iniciar sesión con tus nuevas credenciales.
               </p>
+
+              <button
+                onClick={() => navigate('/login')}
+                className="btn btn-primary"
+                style={{ width: '100%', padding: '14px 20px', fontWeight: '600' }}
+              >
+                Ir al Inicio de Sesión
+              </button>
             </div>
           )}
 
           {/* Back to Login Link */}
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              background: 'none',
-              border: 'none',
-              color: '#475569',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              marginTop: '32px',
-              transition: 'var(--transition-fast)'
-            }}
-            className="back-btn-hover"
-          >
-            <ArrowLeft size={16} />
-            Regresar al inicio de sesión
-          </button>
+          {!submitted && (
+            <button
+              onClick={() => navigate('/login')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#475569',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                marginTop: '32px',
+                transition: 'var(--transition-fast)'
+              }}
+              className="back-btn-hover"
+            >
+              <ArrowLeft size={16} />
+              Regresar al inicio de sesión
+            </button>
+          )}
           <style dangerouslySetInnerHTML={{ __html: `
             .back-btn-hover:hover {
               color: #e21a22 !important;
@@ -334,4 +403,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default ResetPassword;

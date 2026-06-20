@@ -242,7 +242,7 @@ const Sidebar = ({ activeTab }) => {
 
           {/* Perfil */}
           <button
-            onClick={() => alert('Sección de Perfil en mantenimiento.')}
+            onClick={() => navigate('/profile')}
             style={getButtonStyle('profile')}
             className={activeTab !== 'profile' ? 'sidebar-hover-btn' : ''}
           >

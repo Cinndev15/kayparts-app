@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import Profile from './components/Profile';
 import Categories from './components/Categories';
 import Subcategories from './components/Subcategories';
 import Brands from './components/Brands';
@@ -88,6 +90,22 @@ function App() {
           path="/forgot-password" 
           element={
             <ForgotPassword />
+          } 
+        />
+
+        {/* Reset Password Route */}
+        <Route 
+          path="/reset-password" 
+          element={
+            <ResetPassword />
+          } 
+        />
+
+        {/* Profile Route */}
+        <Route 
+          path="/profile" 
+          element={
+            user ? <Profile user={user} onUserUpdate={handleLoginSuccess} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 
