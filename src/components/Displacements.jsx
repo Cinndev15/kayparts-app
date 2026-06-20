@@ -446,369 +446,236 @@ const Displacements = ({ user, onLogout }) => {
           </div>
         </header>
 
-        {/* TITLE AND CREATE BUTTON */}
+        {/* TITLE */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '32px',
-          flexWrap: 'wrap',
-          gap: '16px'
+          marginBottom: '32px'
         }}>
-          <div>
-            <h1 className="title-font" style={{
-              fontSize: '28px',
-              fontWeight: '700',
-              color: '#0f172a',
-              marginBottom: '6px'
-            }}>
-              Gestión de Cilindrajes de Vehículos
-            </h1>
-            <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '450' }}>
-              Gestione los cilindrajes y motorizaciones para los repuestos del catálogo.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="btn btn-primary"
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: '700',
-              borderRadius: '6px'
-            }}
-          >
-            <PlusCircle size={16} />
-            Crear cilindraje
-          </button>
+          <h1 className="title-font" style={{
+            fontSize: '28px',
+            fontWeight: '700',
+            color: '#0f172a',
+            marginBottom: '6px'
+          }}>
+            Gestión de Cilindrajes de Vehículos
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '450' }}>
+            Gestione los cilindrajes y motorizaciones para los repuestos del catálogo.
+          </p>
         </div>
 
-        {/* DISPLACEMENTS TABLE LIST */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', maxWidth: '600px' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              textAlign: 'left'
-            }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
-                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>CILINDRAJE / MOTOR</th>
-                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', textAlign: 'center', width: '120px' }}>ACCIONES</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="2" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                      Cargando cilindrajes...
-                    </td>
-                  </tr>
-                ) : paginatedDisplacements.length > 0 ? (
-                  paginatedDisplacements.map((item) => (
-                    <tr
-                      key={item.id}
-                      style={{
-                        borderBottom: '1px solid #e2e8f0',
-                        backgroundColor: '#ffffff'
-                      }}
-                      className="table-row-hover"
-                    >
-                      {/* Name column */}
-                      <td style={{ padding: '20px 24px', fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
-                        {item.name}
-                      </td>
+        {/* TWO-COLUMN GRID */}
+        <div className="dashboard-split-row" style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '32px',
+          alignItems: 'start'
+        }}>
 
-                      {/* Actions column */}
-                      <td style={{ padding: '20px 24px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', color: '#64748b' }}>
+          {/* LEFT COLUMN: DISPLACEMENTS TABLE LIST */}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+            
+            {/* TABLE BAR */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
+                Listado de Cilindrajes
+              </span>
+              <span style={{
+                fontSize: '12px',
+                color: '#64748b',
+                backgroundColor: '#f1f5f9',
+                padding: '4px 10px',
+                borderRadius: '9999px',
+                fontWeight: '600'
+              }}>
+                {filteredDisplacements.length} Total
+              </span>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                textAlign: 'left'
+              }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>CILINDRAJE / MOTOR</th>
+                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', textAlign: 'center', width: '120px' }}>ACCIONES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="2" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                        Cargando cilindrajes...
+                      </td>
+                    </tr>
+                  ) : paginatedDisplacements.length > 0 ? (
+                    paginatedDisplacements.map((item) => (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #e2e8f0',
+                          backgroundColor: '#ffffff'
+                        }}
+                        className="table-row-hover"
+                      >
+                        {/* Name column */}
+                        <td style={{ padding: '20px 24px', fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
+                          {item.name}
+                        </td>
+
+                        {/* Actions column */}
+                        <td style={{ padding: '20px 24px', textAlign: 'center' }}>
                           <button
                             onClick={() => openEditModal(item)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569' }}
-                            title="Editar"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#475569',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              transition: 'var(--transition-fast)'
+                            }}
+                            className="btn-edit-hover"
+                            title="Editar cilindraje"
                           >
                             <Edit2 size={16} />
                           </button>
-                        </div>
+                        </td>
+
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                        No se encontraron cilindrajes que coincidan con la búsqueda.
                       </td>
-
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="2" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                      No se encontraron cilindrajes que coincidan con la búsqueda.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <style dangerouslySetInnerHTML={{ __html: `
-              .table-row-hover:hover {
-                background-color: #f8fafc !important;
-              }
-            `}} />
-          </div>
-
-          {/* TABLE FOOTER / PAGINATION */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#f1f5f9',
-            borderTop: '1px solid #e2e8f0',
-            padding: '16px 24px',
-            fontSize: '13px',
-            color: '#64748b'
-          }}>
-            <div>
-              Mostrando <strong style={{ color: '#1e293b' }}>{filteredDisplacements.length > 0 ? startIndex + 1 : 0} - {Math.min(endIndex, filteredDisplacements.length)}</strong> de <strong style={{ color: '#1e293b' }}>{filteredDisplacements.length}</strong> cilindrajes
+                  )}
+                </tbody>
+              </table>
+              <style dangerouslySetInnerHTML={{ __html: `
+                .table-row-hover:hover {
+                  background-color: #f8fafc !important;
+                }
+                .btn-edit-hover:hover {
+                  background-color: #f1f5f9;
+                  color: #e21a22 !important;
+                }
+              `}} />
             </div>
 
-            {/* Pagination Controls */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                disabled={currentPage === 1}
-                style={{
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: currentPage === 1 ? '#cbd5e1' : '#64748b',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
-                  cursor: currentPage === 1 ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: '600'
-                }}
-                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-              >
-                &lt;
-              </button>
+            {/* TABLE FOOTER / PAGINATION */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: '#f8fafc',
+              borderTop: '1px solid #e2e8f0',
+              padding: '16px 24px',
+              fontSize: '13px',
+              color: '#64748b'
+            }}>
+              <div>
+                Mostrando <strong style={{ color: '#1e293b' }}>{filteredDisplacements.length > 0 ? startIndex + 1 : 0} - {Math.min(endIndex, filteredDisplacements.length)}</strong> de <strong style={{ color: '#1e293b' }}>{filteredDisplacements.length}</strong> cilindrajes
+              </div>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              {/* Pagination Controls */}
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  key={pageNum}
+                  disabled={currentPage === 1}
                   style={{
-                    border: pageNum === currentPage ? 'none' : '1px solid #cbd5e1',
-                    backgroundColor: pageNum === currentPage ? '#E31B23' : '#ffffff',
-                    color: pageNum === currentPage ? '#ffffff' : '#64748b',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: currentPage === 1 ? '#cbd5e1' : '#64748b',
                     width: '32px',
                     height: '32px',
                     borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontWeight: pageNum === currentPage ? '700' : '600'
+                    cursor: currentPage === 1 ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '600'
                   }}
-                  onClick={() => setCurrentPage(pageNum)}
+                  onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                 >
-                  {pageNum}
+                  &lt;
                 </button>
-              ))}
 
-              <button
-                disabled={currentPage === totalPages || totalPages === 0}
-                style={{
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#64748b',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
-                  cursor: (currentPage === totalPages || totalPages === 0) ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: '600'
-                }}
-                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-              >
-                &gt;
-              </button>
-            </div>
-          </div>
-        </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    style={{
+                      border: pageNum === currentPage ? 'none' : '1px solid #cbd5e1',
+                      backgroundColor: pageNum === currentPage ? '#E31B23' : '#ffffff',
+                      color: pageNum === currentPage ? '#ffffff' : '#64748b',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontWeight: pageNum === currentPage ? '700' : '600'
+                    }}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
 
-      </div>
-
-      {/* 3. MODAL POPUP (Crear nuevo cilindraje) */}
-      {isModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          animation: 'fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-        }}>
-          
-          <div style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #cbd5e1',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '400px',
-            boxShadow: 'var(--shadow-premium)',
-            overflow: 'hidden',
-            animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            
-            <style dangerouslySetInnerHTML={{ __html: `
-              @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-              }
-              @keyframes scaleUp {
-                from { opacity: 0; transform: scale(0.95) translateY(10px); }
-                to { opacity: 1; transform: scale(1) translateY(0); }
-              }
-            `}} />
-
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 24px 16px 24px',
-              borderBottom: '1px solid #e2e8f0'
-            }}>
-              <h2 className="title-font" style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: '#0f172a'
-              }}>
-                Crear Nuevo Cilindraje
-              </h2>
-              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                Ingrese el cilindraje o motorización.
-              </p>
-            </div>
-
-            {/* Modal Form Content */}
-            <form onSubmit={handleCreateDisplacement}>
-              <div style={{
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '18px'
-              }}>
-                {modalError && (
-                  <div style={{
-                    backgroundColor: '#fef2f2',
-                    border: '1px solid #fee2e2',
-                    color: '#ef4444',
-                    padding: '12px 16px',
+                <button
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  style={{
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#64748b',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    textAlign: 'left'
-                  }}>
-                    {modalError}
-                  </div>
-                )}
-                {/* Displacement Name field */}
-                <div className="input-group">
-                  <label htmlFor="disp-name" className="input-label">
-                    Cilindraje / Motor *
-                  </label>
-                  <input
-                    id="disp-name"
-                    type="text"
-                    placeholder="Ej. 2.0L o 1600cc"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="input-control"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Modal Actions */}
-              <div style={{
-                padding: '16px 24px',
-                borderTop: '1px solid #e2e8f0',
-                backgroundColor: '#f8fafc',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px'
-              }}>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn btn-secondary"
-                  style={{ padding: '10px 18px', borderRadius: '6px' }}
+                    cursor: (currentPage === totalPages || totalPages === 0) ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '600'
+                  }}
+                  onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '10px 18px', borderRadius: '6px' }}
-                >
-                  Guardar cilindraje
+                  &gt;
                 </button>
               </div>
-            </form>
-
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Edit Displacement Modal */}
-      {editingDisplacement && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          padding: '16px'
-        }}>
-          <div style={{
+          {/* RIGHT COLUMN: STATIC FORM CARD */}
+          <div className="card" style={{
             backgroundColor: '#ffffff',
+            padding: '24px',
+            border: '1px solid #e2e8f0',
             borderRadius: '12px',
-            width: '100%',
-            maxWidth: '400px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden'
+            boxShadow: 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
           }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 24px 16px 24px',
-              borderBottom: '1px solid #e2e8f0'
-            }}>
-              <h2 className="title-font" style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: '#0f172a'
-              }}>
-                Editar Cilindraje de Vehículo
-              </h2>
-              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                Actualice el valor del cilindraje o motorización.
-              </p>
-            </div>
+            {editingDisplacement ? (
+              /* EDIT DISPLACEMENT FORM */
+              <form onSubmit={handleUpdateDisplacement} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div>
+                  <h3 className="title-font" style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>
+                    Editar Cilindraje de Vehículo
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748b' }}>
+                    Actualice el valor del cilindraje o motorización.
+                  </p>
+                </div>
 
-            {/* Modal Form Content */}
-            <form onSubmit={handleUpdateDisplacement}>
-              <div style={{
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '18px'
-              }}>
                 {modalError && (
                   <div style={{
                     backgroundColor: '#fef2f2',
@@ -823,9 +690,15 @@ const Displacements = ({ user, onLogout }) => {
                     {modalError}
                   </div>
                 )}
-                {/* Displacement Name field */}
+
                 <div className="input-group">
-                  <label htmlFor="edit-disp-name" className="input-label">
+                  <label htmlFor="edit-disp-name" className="input-label" style={{
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    color: '#475569',
+                    marginBottom: '6px',
+                    display: 'block'
+                  }}>
                     Cilindraje / Motor *
                   </label>
                   <input
@@ -835,44 +708,162 @@ const Displacements = ({ user, onLogout }) => {
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     className="input-control"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      color: '#0f172a',
+                      outline: 'none'
+                    }}
                     required
                   />
                 </div>
-              </div>
 
-              {/* Modal Actions */}
-              <div style={{
-                padding: '16px 24px',
-                borderTop: '1px solid #e2e8f0',
-                backgroundColor: '#f8fafc',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px'
-              }}>
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="btn btn-secondary"
-                  style={{ padding: '10px 18px', borderRadius: '6px' }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '10px 18px', borderRadius: '6px' }}
-                >
-                  Guardar cambios
-                </button>
-              </div>
-            </form>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  marginTop: '10px'
+                }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      borderRadius: '6px',
+                      backgroundColor: '#e21a22',
+                      color: '#ffffff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <PlusCircle size={14} />
+                    Guardar cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeEditModal}
+                    className="btn btn-secondary"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      borderRadius: '6px',
+                      backgroundColor: '#f1f5f9',
+                      color: '#475569',
+                      border: '1px solid #cbd5e1',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancelar Edición
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* CREATE DISPLACEMENT FORM */
+              <form onSubmit={handleCreateDisplacement} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <div>
+                  <h3 className="title-font" style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>
+                    Crear Nuevo Cilindraje
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748b' }}>
+                    Ingrese el cilindraje o motorización.
+                  </p>
+                </div>
 
+                {modalError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    color: '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    textAlign: 'left'
+                  }}>
+                    {modalError}
+                  </div>
+                )}
+
+                <div className="input-group">
+                  <label htmlFor="disp-name" className="input-label" style={{
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    color: '#475569',
+                    marginBottom: '6px',
+                    display: 'block'
+                  }}>
+                    Cilindraje / Motor *
+                  </label>
+                  <input
+                    id="disp-name"
+                    type="text"
+                    placeholder="Ej. 2.0L o 1600cc"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="input-control"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      color: '#0f172a',
+                      outline: 'none'
+                    }}
+                    required
+                  />
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  marginTop: '10px'
+                }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      borderRadius: '6px',
+                      backgroundColor: '#e21a22',
+                      color: '#ffffff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <PlusCircle size={14} />
+                    Guardar cilindraje
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
-        </div>
-      )}
 
+        </div>
+      </div>
     </div>
   );
 };
 
 export default Displacements;
+
