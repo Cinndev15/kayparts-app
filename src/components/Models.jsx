@@ -129,7 +129,7 @@ const Models = ({ user, onLogout }) => {
             image: m.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
             name: m.name,
             brand_id: m.brand_id,
-            brand_name: m.brand_name || 'Sin marca',
+            brand_name: m.brand?.name || m.brand_name || 'Sin marca',
             year_from: m.year_from || '',
             year_to: m.year_to || '',
             description: m.description || '',
