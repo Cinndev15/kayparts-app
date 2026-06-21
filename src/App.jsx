@@ -15,6 +15,7 @@ import ProductBrands from './components/ProductBrands';
 import Taxes from './components/Taxes';
 import Products from './components/Products';
 import Clients from './components/Clients';
+import Carriers from './components/Carriers';
 import './App.css';
 
 function App() {
@@ -194,6 +195,14 @@ function App() {
           path="/clients" 
           element={
             user ? <Clients user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Carriers Route */}
+        <Route 
+          path="/carriers" 
+          element={
+            user ? <Carriers user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 

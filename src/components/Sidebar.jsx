@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Grid, Folder, Layers, Car, User, PlusCircle, HelpCircle,
   Wrench, Calendar, Gauge, Tag, Percent, Package, ChevronDown, ChevronRight,
-  Users
+  Users, Truck
 } from 'lucide-react';
 import Logo from './Logo';
 
@@ -228,6 +228,16 @@ const Sidebar = ({ activeTab }) => {
           >
             <Users size={18} style={{ color: activeTab === 'clients' ? '#0f172a' : undefined }} />
             Clientes
+          </button>
+
+          {/* Transportadoras */}
+          <button
+            onClick={() => navigate('/carriers')}
+            style={getButtonStyle('carriers')}
+            className={activeTab !== 'carriers' ? 'sidebar-hover-btn' : ''}
+          >
+            <Truck size={18} style={{ color: activeTab === 'carriers' ? '#0f172a' : undefined }} />
+            Transportadoras
           </button>
 
           {/* Impuestos */}
