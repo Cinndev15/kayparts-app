@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Grid, Folder, Layers, Car, User, PlusCircle, HelpCircle,
   Wrench, Calendar, Gauge, Tag, Percent, Package, ChevronDown, ChevronRight,
-  Users, Truck
+  Users, Truck, ClipboardList
 } from 'lucide-react';
 import Logo from './Logo';
 
@@ -115,6 +115,16 @@ const Sidebar = ({ activeTab }) => {
           >
             <Grid size={18} style={{ color: activeTab === 'dashboard' ? '#0f172a' : undefined }} />
             Panel de Control
+          </button>
+
+          {/* Pedidos */}
+          <button
+            onClick={() => navigate('/orders')}
+            style={getButtonStyle('orders')}
+            className={activeTab !== 'orders' ? 'sidebar-hover-btn' : ''}
+          >
+            <ClipboardList size={18} style={{ color: activeTab === 'orders' ? '#0f172a' : undefined }} />
+            Pedidos
           </button>
 
           {/* Group Header: Productos */}
