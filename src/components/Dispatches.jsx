@@ -201,17 +201,21 @@ const Dispatches = ({ user, onLogout }) => {
       showAlert('Por favor, seleccione un pedido.', 'error');
       return;
     }
-    if (!formData.carrier_id) {
-      showAlert('Por favor, seleccione una transportadora.', 'error');
-      return;
-    }
-    if (!formData.tracking_number.trim()) {
-      showAlert('Por favor, ingrese el número de guía.', 'error');
-      return;
-    }
     if (!formData.responsible_person.trim()) {
       showAlert('Por favor, ingrese la persona responsable.', 'error');
       return;
+    }
+
+    const requiresCarrier = !['recibido', 'alistamiento'].includes(formData.status);
+    if (requiresCarrier) {
+      if (!formData.carrier_id) {
+        showAlert('Por favor, seleccione una transportadora.', 'error');
+        return;
+      }
+      if (!formData.tracking_number.trim()) {
+        showAlert('Por favor, ingrese el número de guía.', 'error');
+        return;
+      }
     }
 
     const token = localStorage.getItem('kayparts_token');
@@ -231,11 +235,11 @@ const Dispatches = ({ user, onLogout }) => {
         },
         body: JSON.stringify({
           order_id: parseInt(formData.order_id),
-          carrier_id: parseInt(formData.carrier_id),
-          tracking_number: formData.tracking_number.trim(),
+          carrier_id: requiresCarrier ? parseInt(formData.carrier_id) : null,
+          tracking_number: requiresCarrier ? formData.tracking_number.trim() : null,
           responsible_person: formData.responsible_person.trim(),
           status: formData.status,
-          dispatch_date: formData.dispatch_date ? new Date(formData.dispatch_date) : null,
+          dispatch_date: formData.dispatch_date ? new Date(formData.dispatch_date) : new Date(),
           notes: formData.notes.trim() || null
         })
       });
@@ -939,7 +943,7 @@ const Dispatches = ({ user, onLogout }) => {
               {/* Carrier Select */}
               <div className="input-group">
                 <label htmlFor="dispatch-carrier" className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Transportadora *
+                  Transportadora {!['recibido', 'alistamiento'].includes(formData.status) && '*'}
                 </label>
                 <select
                   id="dispatch-carrier"
@@ -948,7 +952,7 @@ const Dispatches = ({ user, onLogout }) => {
                   onChange={handleInputChange}
                   className="input-control"
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', backgroundColor: '#ffffff', outline: 'none' }}
-                  required
+                  required={!['recibido', 'alistamiento'].includes(formData.status)}
                 >
                   <option value="">Seleccione una transportadora...</option>
                   {carriers.map(c => (
@@ -962,7 +966,7 @@ const Dispatches = ({ user, onLogout }) => {
               {/* Tracking Number */}
               <div className="input-group">
                 <label htmlFor="dispatch-tracking" className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Número de Guía (Tracking) *
+                  Número de Guía (Tracking) {!['recibido', 'alistamiento'].includes(formData.status) && '*'}
                 </label>
                 <input
                   id="dispatch-tracking"
@@ -973,7 +977,7 @@ const Dispatches = ({ user, onLogout }) => {
                   onChange={handleInputChange}
                   className="input-control"
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                  required
+                  required={!['recibido', 'alistamiento'].includes(formData.status)}
                 />
               </div>
 
