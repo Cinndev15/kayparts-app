@@ -1390,15 +1390,17 @@ const Products = ({ user, onLogout }) => {
                       {/* Spare Type */}
                       <div className="input-group">
                         <label htmlFor="prod-spare" className="input-label">Tipo de repuesto</label>
-                        <input
+                        <select
                           id="prod-spare"
                           name="spare_type"
-                          type="text"
-                          placeholder="Ej. Original, Homologado, Genérico"
                           value={formData.spare_type}
                           onChange={handleInputChange}
                           className="input-control"
-                        />
+                        >
+                          <option value="">-- Seleccione tipo --</option>
+                          <option value="Original">Original</option>
+                          <option value="Generico">Genérico</option>
+                        </select>
                       </div>
 
                       {/* Position */}
