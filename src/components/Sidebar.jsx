@@ -80,13 +80,14 @@ const Sidebar = ({ activeTab }) => {
   return (
     <aside className="dashboard-sidebar" style={{
       width: '260px',
+      height: '100vh',
       backgroundColor: '#ffffff',
       borderRight: '1px solid #cbd5e1',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
       padding: '30px 20px',
-      flexShrink: 0
+      flexShrink: 0,
+      boxSizing: 'border-box'
     }}>
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -97,13 +98,33 @@ const Sidebar = ({ activeTab }) => {
           background-color: rgba(15, 23, 42, 0.05) !important;
           color: #0f172a !important;
         }
+        .sidebar-scrollable-nav::-webkit-scrollbar {
+          width: 4px;
+        }
+        .sidebar-scrollable-nav::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-scrollable-nav::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        .sidebar-scrollable-nav::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
       `}} />
 
-      <div>
-        <div style={{ marginBottom: '40px', paddingLeft: '8px' }}>
-          <Logo height={42} />
-        </div>
+      {/* STATIC LOGO */}
+      <div style={{ marginBottom: '24px', paddingLeft: '8px', flexShrink: 0 }}>
+        <Logo height={42} />
+      </div>
 
+      {/* SCROLLABLE NAV SECTION */}
+      <div className="sidebar-scrollable-nav" style={{
+        flex: 1,
+        overflowY: 'auto',
+        marginBottom: '24px',
+        paddingRight: '4px'
+      }}>
         {/* Sidebar Menu Items */}
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           
@@ -248,6 +269,16 @@ const Sidebar = ({ activeTab }) => {
           >
             <Users size={18} style={{ color: activeTab === 'clients' ? '#0f172a' : undefined }} />
             Clientes
+          </button>
+
+          {/* Centros Técnicos */}
+          <button
+            onClick={() => navigate('/workshops')}
+            style={getButtonStyle('workshops')}
+            className={activeTab !== 'workshops' ? 'sidebar-hover-btn' : ''}
+          >
+            <Wrench size={18} style={{ color: activeTab === 'workshops' ? '#0f172a' : undefined }} />
+            Centros Técnicos
           </button>
 
           {/* Transportadoras */}

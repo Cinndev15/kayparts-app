@@ -18,6 +18,7 @@ import Clients from './components/Clients';
 import Carriers from './components/Carriers';
 import Orders from './components/Orders';
 import Dispatches from './components/Dispatches';
+import Workshops from './components/Workshops';
 import './App.css';
 
 function App() {
@@ -221,6 +222,14 @@ function App() {
           path="/dispatches" 
           element={
             user ? <Dispatches user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Workshops Route */}
+        <Route 
+          path="/workshops" 
+          element={
+            user ? <Workshops user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 
