@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Grid, Folder, Layers, Car, User, PlusCircle, HelpCircle,
   Wrench, Calendar, Gauge, Tag, Percent, Package, ChevronDown, ChevronRight,
-  Users, Truck, ClipboardList, PackageCheck
+  Users, Truck, ClipboardList, PackageCheck, FileText
 } from 'lucide-react';
 import Logo from './Logo';
 
@@ -279,6 +279,16 @@ const Sidebar = ({ activeTab }) => {
           >
             <Wrench size={18} style={{ color: activeTab === 'workshops' ? '#0f172a' : undefined }} />
             Centros Técnicos
+          </button>
+
+          {/* Blog / Noticias */}
+          <button
+            onClick={() => navigate('/articles')}
+            style={getButtonStyle('articles')}
+            className={activeTab !== 'articles' ? 'sidebar-hover-btn' : ''}
+          >
+            <FileText size={18} style={{ color: activeTab === 'articles' ? '#0f172a' : undefined }} />
+            Noticias
           </button>
 
           {/* Transportadoras */}
