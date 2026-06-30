@@ -24,6 +24,7 @@ const Suppliers = ({ user, onLogout }) => {
 
   // Form states for Create/Edit
   const [formData, setFormData] = useState({
+    identification_type: 'NIT',
     nit_or_cedula: '',
     razon_social: '',
     assigned_advisor: '',
@@ -151,6 +152,7 @@ const Suppliers = ({ user, onLogout }) => {
   const startCreate = () => {
     setEditingSupplier(null);
     setFormData({
+      identification_type: 'NIT',
       nit_or_cedula: '',
       razon_social: '',
       assigned_advisor: '',
@@ -179,6 +181,7 @@ const Suppliers = ({ user, onLogout }) => {
     }
 
     setFormData({
+      identification_type: supplierObj.identification_type || 'NIT',
       nit_or_cedula: supplierObj.nit_or_cedula || '',
       razon_social: supplierObj.razon_social || '',
       assigned_advisor: supplierObj.assigned_advisor || '',
@@ -545,6 +548,7 @@ const Suppliers = ({ user, onLogout }) => {
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>RAZÓN SOCIAL</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>TIPO DOC</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>NIT / CÉDULA</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ASESOR ASIGNADO</th>
                   <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>CIUDAD</th>
@@ -555,7 +559,7 @@ const Suppliers = ({ user, onLogout }) => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
                       Cargando proveedores...
                     </td>
                   </tr>
@@ -573,6 +577,11 @@ const Suppliers = ({ user, onLogout }) => {
                       <td style={{ padding: '20px 24px', fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
                         <div>{item.razon_social}</div>
                         {item.email && <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '400' }}>{item.email}</span>}
+                      </td>
+
+                      {/* Doc Type */}
+                      <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569', fontWeight: '500' }}>
+                        {item.identification_type || 'NIT'}
                       </td>
 
                       {/* NIT */}
@@ -648,7 +657,7 @@ const Suppliers = ({ user, onLogout }) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
                       No se encontraron proveedores.
                     </td>
                   </tr>
@@ -863,12 +872,29 @@ const Suppliers = ({ user, onLogout }) => {
                 />
               </div>
 
-              {/* Grid for NIT & Advisor */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {/* NIT or Cédula */}
+              {/* Grid for ID Type & Number */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
+                {/* Tipo de Identificación */}
                 <div className="input-group">
                   <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                    NIT o Cédula *
+                    Tipo Doc. *
+                  </label>
+                  <select
+                    name="identification_type"
+                    value={formData.identification_type}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
+                    required
+                  >
+                    <option value="NIT">NIT</option>
+                    <option value="Cédula">Cédula</option>
+                  </select>
+                </div>
+
+                {/* Número */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Nro. Identificación *
                   </label>
                   <input
                     name="nit_or_cedula"
@@ -881,7 +907,10 @@ const Suppliers = ({ user, onLogout }) => {
                     required
                   />
                 </div>
+              </div>
 
+              {/* Grid for Advisor & Email */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {/* Assigned Advisor */}
                 <div className="input-group">
                   <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
@@ -892,6 +921,22 @@ const Suppliers = ({ user, onLogout }) => {
                     type="text"
                     placeholder="Ej. Carlos Gomez"
                     value={formData.assigned_advisor}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Correo electrónico
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Ej. ventas@proveedor.com"
+                    value={formData.email}
                     onChange={handleInputChange}
                     className="input-control"
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
@@ -959,24 +1004,8 @@ const Suppliers = ({ user, onLogout }) => {
                 />
               </div>
 
-              {/* Grid for Email & Phone */}
+              {/* Grid for Phone & WhatsApp */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {/* Email */}
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                    Correo electrónico
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="Ej. ventas@proveedor.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="input-control"
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                  />
-                </div>
-
                 {/* Phone */}
                 <div className="input-group">
                   <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
@@ -992,10 +1021,7 @@ const Suppliers = ({ user, onLogout }) => {
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
                   />
                 </div>
-              </div>
 
-              {/* Grid for WhatsApp & Status */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {/* WhatsApp */}
                 <div className="input-group">
                   <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
@@ -1011,23 +1037,23 @@ const Suppliers = ({ user, onLogout }) => {
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
                   />
                 </div>
+              </div>
 
-                {/* Status Selector */}
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                    Estado *
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
-                    required
-                  >
-                    <option value="active">Activo</option>
-                    <option value="inactive">Inactivo</option>
-                  </select>
-                </div>
+              {/* Status Selector */}
+              <div className="input-group" style={{ width: '50%', paddingRight: '8px' }}>
+                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                  Estado *
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
+                  required
+                >
+                  <option value="active">Activo</option>
+                  <option value="inactive">Inactivo</option>
+                </select>
               </div>
 
               {/* Form Actions */}
