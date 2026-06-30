@@ -20,6 +20,7 @@ import Orders from './components/Orders';
 import Dispatches from './components/Dispatches';
 import Workshops from './components/Workshops';
 import Articles from './components/Articles';
+import Suppliers from './components/Suppliers';
 import './App.css';
 
 function App() {
@@ -239,6 +240,14 @@ function App() {
           path="/articles" 
           element={
             user ? <Articles user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Suppliers Route */}
+        <Route 
+          path="/suppliers" 
+          element={
+            user ? <Suppliers user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 
