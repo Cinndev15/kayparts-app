@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LogOut, ChevronDown, PlusCircle,
-  Briefcase, Edit2, Info, CheckCircle2, XCircle
+  Briefcase, Edit2, Info, CheckCircle2, XCircle, X
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Swal from 'sweetalert2';
 
 const Suppliers = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -15,6 +16,11 @@ const Suppliers = ({ user, onLogout }) => {
 
   // Data lists
   const [suppliers, setSuppliers] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  // Modal Control
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form states for Create/Edit
   const [formData, setFormData] = useState({
@@ -35,13 +41,12 @@ const Suppliers = ({ user, onLogout }) => {
 
   // Success / error message states
   const [alertMsg, setAlertMsg] = useState(null);
-  const [alertType, setAlertType] = useState('success'); // 'success' | 'error'
+  const [alertType, setAlertType] = useState('success');
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
 
-  // Helper to trigger temporary alerts
   const showAlert = (message, type = 'success') => {
     setAlertMsg(message);
     setAlertType(type);
@@ -50,7 +55,35 @@ const Suppliers = ({ user, onLogout }) => {
     }, 5000);
   };
 
-  // Fetch suppliers on mount
+  // Fetch departments list
+  const fetchDepartments = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+    try {
+      const response = await fetch(`${apiUrl}/geo/departments`);
+      const data = await response.json();
+      if (response.ok) {
+        setDepartments(data);
+      }
+    } catch (err) {
+      console.error('Error fetching departments:', err);
+    }
+  };
+
+  // Fetch cities for a department ID
+  const fetchCities = async (deptId) => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+    try {
+      const response = await fetch(`${apiUrl}/geo/cities?department_id=${deptId}`);
+      const data = await response.json();
+      if (response.ok && data) {
+        setCities(data.cities || []);
+      }
+    } catch (err) {
+      console.error('Error fetching cities:', err);
+    }
+  };
+
+  // Fetch suppliers list on mount
   const fetchSuppliers = async () => {
     setLoading(true);
     const token = localStorage.getItem('kayparts_token');
@@ -80,6 +113,7 @@ const Suppliers = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchSuppliers();
+    fetchDepartments();
   }, []);
 
   // Reset page when search term changes
@@ -96,25 +130,25 @@ const Suppliers = ({ user, onLogout }) => {
     }));
   };
 
-  // Switch to editing mode
-  const startEdit = (supplierObj) => {
-    setEditingSupplier(supplierObj);
-    setFormData({
-      nit_or_cedula: supplierObj.nit_or_cedula || '',
-      razon_social: supplierObj.razon_social || '',
-      assigned_advisor: supplierObj.assigned_advisor || '',
-      phone: supplierObj.phone || '',
-      whatsapp: supplierObj.whatsapp || '',
-      department: supplierObj.department || '',
-      city: supplierObj.city || '',
-      address: supplierObj.address || '',
-      email: supplierObj.email || '',
-      status: supplierObj.status || 'active'
-    });
+  // Handle department change in form
+  const handleDepartmentChange = (e) => {
+    const deptName = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      department: deptName,
+      city: '' // Clear city when department changes
+    }));
+    setCities([]);
+
+    // Find the department ID
+    const selectedDept = departments.find(d => d.name === deptName);
+    if (selectedDept) {
+      fetchCities(selectedDept.id);
+    }
   };
 
-  // Cancel edit mode and reset form
-  const cancelEdit = () => {
+  // Open modal for new supplier
+  const startCreate = () => {
     setEditingSupplier(null);
     setFormData({
       nit_or_cedula: '',
@@ -128,6 +162,43 @@ const Suppliers = ({ user, onLogout }) => {
       email: '',
       status: 'active'
     });
+    setCities([]);
+    setIsModalOpen(true);
+  };
+
+  // Switch to editing mode (and open modal)
+  const startEdit = async (supplierObj) => {
+    setEditingSupplier(supplierObj);
+    
+    // Load cities if department is set
+    if (supplierObj.department) {
+      const matchedDept = departments.find(d => d.name === supplierObj.department);
+      if (matchedDept) {
+        await fetchCities(matchedDept.id);
+      }
+    }
+
+    setFormData({
+      nit_or_cedula: supplierObj.nit_or_cedula || '',
+      razon_social: supplierObj.razon_social || '',
+      assigned_advisor: supplierObj.assigned_advisor || '',
+      phone: supplierObj.phone || '',
+      whatsapp: supplierObj.whatsapp || '',
+      department: supplierObj.department || '',
+      city: supplierObj.city || '',
+      address: supplierObj.address || '',
+      email: supplierObj.email || '',
+      status: supplierObj.status || 'active'
+    });
+    
+    setIsModalOpen(true);
+  };
+
+  // Close modal and reset form
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingSupplier(null);
+    setAlertMsg(null);
   };
 
   // Handle Create or Update
@@ -168,8 +239,14 @@ const Suppliers = ({ user, onLogout }) => {
         throw new Error(data.message || `Error al ${isEdit ? 'actualizar' : 'crear'} el proveedor.`);
       }
 
-      showAlert(`Proveedor ${isEdit ? 'actualizado' : 'creado'} correctamente.`, 'success');
-      cancelEdit();
+      Swal.fire({
+        icon: 'success',
+        title: `Proveedor ${isEdit ? 'Actualizado' : 'Creado'}`,
+        text: `El proveedor se ha ${isEdit ? 'modificado' : 'guardado'} correctamente.`,
+        confirmButtonColor: '#e21a22'
+      });
+
+      closeModal();
       fetchSuppliers();
 
     } catch (err) {
@@ -204,14 +281,6 @@ const Suppliers = ({ user, onLogout }) => {
 
       {/* 1. SIDEBAR */}
       <Sidebar activeTab="suppliers" />
-
-      {/* Style tags for split layout responsiveness */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (max-width: 1023px) {
-          .dashboard-main-content { padding: 20px !important; }
-          .dashboard-split-row { grid-template-columns: 1fr !important; }
-        }
-      `}} />
 
       {/* 2. MAIN CONTENT AREA */}
       <div className="dashboard-main-content" style={{
@@ -387,287 +456,374 @@ const Suppliers = ({ user, onLogout }) => {
           </div>
         </header>
 
-        {/* TITLE AND DESCRIPTION */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 className="title-font" style={{
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#0f172a',
-            marginBottom: '6px'
-          }}>
-            Catálogo de Proveedores
-          </h1>
-          <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '450' }}>
-            Gestione la base de datos de proveedores y asesores comerciales asignados.
-          </p>
-        </div>
-
-        {/* SPLIT PANE ROW */}
-        <div className="dashboard-split-row" style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '32px',
-          alignItems: 'start'
+        {/* TITLE AND TOP BUTTON BAR */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '32px',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}>
-
-          {/* COLUMN 1: LIST TABLE */}
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-            
-            {/* TABLE BAR */}
-            <div style={{
-              padding: '20px 24px',
-              borderBottom: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+          <div>
+            <h1 className="title-font" style={{
+              fontSize: '28px',
+              fontWeight: '700',
+              color: '#0f172a',
+              marginBottom: '6px'
             }}>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
-                Listado de Proveedores
-              </span>
-              <span style={{
-                fontSize: '12px',
-                color: '#64748b',
-                backgroundColor: '#f1f5f9',
-                padding: '4px 10px',
-                borderRadius: '9999px',
-                fontWeight: '600'
-              }}>
-                {filteredSuppliers.length} Total
-              </span>
-            </div>
-
-            {/* TABLE CONTAINER */}
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'left'
-              }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>RAZÓN SOCIAL</th>
-                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>NIT / CÉDULA</th>
-                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ASESOR ASIGNADO</th>
-                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ESTADO</th>
-                    <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', textAlign: 'center', width: '100px' }}>ACCIONES</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                        Cargando proveedores...
-                      </td>
-                    </tr>
-                  ) : paginatedSuppliers.length > 0 ? (
-                    paginatedSuppliers.map((item) => (
-                      <tr
-                        key={item.id}
-                        style={{
-                          borderBottom: '1px solid #e2e8f0',
-                          backgroundColor: '#ffffff'
-                        }}
-                        className="table-row-hover"
-                      >
-                        {/* Name */}
-                        <td style={{ padding: '20px 24px', fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
-                          <div>{item.razon_social}</div>
-                          {item.email && <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '400' }}>{item.email}</span>}
-                        </td>
-
-                        {/* NIT */}
-                        <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569' }}>
-                          {item.nit_or_cedula}
-                        </td>
-
-                        {/* Advisor */}
-                        <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569' }}>
-                          {item.assigned_advisor || 'No asignado'}
-                        </td>
-
-                        {/* Status */}
-                        <td style={{ padding: '20px 24px' }}>
-                          {item.status === 'active' ? (
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              backgroundColor: '#d1fae5',
-                              color: '#065f46',
-                              padding: '4px 10px',
-                              borderRadius: '9999px',
-                              fontSize: '12px',
-                              fontWeight: '700'
-                            }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-                              ACTIVO
-                            </span>
-                          ) : (
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              backgroundColor: '#fee2e2',
-                              color: '#991b1b',
-                              padding: '4px 10px',
-                              borderRadius: '9999px',
-                              fontSize: '12px',
-                              fontWeight: '700'
-                            }}>
-                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
-                              INACTIVO
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Actions */}
-                        <td style={{ padding: '20px 24px', textAlign: 'center' }}>
-                          <button
-                            onClick={() => startEdit(item)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              color: '#475569',
-                              padding: '6px',
-                              borderRadius: '6px',
-                              transition: 'var(--transition-fast)'
-                            }}
-                            className="btn-edit-hover"
-                            title="Editar proveedor"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                        No se encontraron proveedores.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              <style dangerouslySetInnerHTML={{ __html: `
-                .table-row-hover:hover {
-                  background-color: #f8fafc !important;
-                }
-                .btn-edit-hover:hover {
-                  background-color: #f1f5f9;
-                  color: #e21a22 !important;
-                }
-              `}} />
-            </div>
-
-            {/* TABLE FOOTER / PAGINATION */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#f8fafc',
-              borderTop: '1px solid #e2e8f0',
-              padding: '16px 24px',
-              fontSize: '13px',
-              color: '#64748b'
-            }}>
-              <div>
-                Mostrando <strong style={{ color: '#1e293b' }}>{filteredSuppliers.length > 0 ? startIndex + 1 : 0} - {Math.min(endIndex, filteredSuppliers.length)}</strong> de <strong style={{ color: '#1e293b' }}>{filteredSuppliers.length}</strong> registros
-              </div>
-
-              {/* Pagination Controls */}
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  disabled={currentPage === 1}
-                  style={{
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: currentPage === 1 ? '#cbd5e1' : '#64748b',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '6px',
-                    cursor: currentPage === 1 ? 'default' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: '600'
-                  }}
-                  onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-                >
-                  &lt;
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                  <button
-                    key={pageNum}
-                    style={{
-                      border: pageNum === currentPage ? 'none' : '1px solid #cbd5e1',
-                      backgroundColor: pageNum === currentPage ? '#E31B23' : '#ffffff',
-                      color: pageNum === currentPage ? '#ffffff' : '#64748b',
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: pageNum === currentPage ? '700' : '600'
-                    }}
-                    onClick={() => setCurrentPage(pageNum)}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
-
-                <button
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  style={{
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#64748b',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '6px',
-                    cursor: (currentPage === totalPages || totalPages === 0) ? 'default' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: '600'
-                  }}
-                  onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-                >
-                  &gt;
-                </button>
-              </div>
-            </div>
+              Catálogo de Proveedores
+            </h1>
+            <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '450' }}>
+              Gestione la base de datos de proveedores y asesores comerciales asignados.
+            </p>
           </div>
 
-          {/* COLUMN 2: CREATE / EDIT FORM */}
-          <div className="card" style={{
+          <button
+            onClick={startCreate}
+            style={{
+              backgroundColor: '#e21a22',
+              color: '#ffffff',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'background-color 0.2s'
+            }}
+            className="btn-create-hover"
+          >
+            <PlusCircle size={18} />
+            Crear Proveedor
+          </button>
+          <style dangerouslySetInnerHTML={{ __html: `
+            .btn-create-hover:hover {
+              background-color: #b91c1c !important;
+            }
+          `}} />
+        </div>
+
+        {/* FULL WIDTH LIST TABLE */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', width: '100%' }}>
+          
+          {/* TABLE BAR */}
+          <div style={{
+            padding: '20px 24px',
+            borderBottom: '1px solid #e2e8f0',
             backgroundColor: '#ffffff',
-            padding: '24px',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            boxShadow: 'var(--shadow-sm)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}>
-            
+            <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
+              Listado de Proveedores
+            </span>
+            <span style={{
+              fontSize: '12px',
+              color: '#64748b',
+              backgroundColor: '#f1f5f9',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              fontWeight: '600'
+            }}>
+              {filteredSuppliers.length} Total
+            </span>
+          </div>
+
+          {/* TABLE CONTAINER */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              textAlign: 'left'
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>RAZÓN SOCIAL</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>NIT / CÉDULA</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ASESOR ASIGNADO</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>CIUDAD</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569' }}>ESTADO</th>
+                  <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: '700', color: '#475569', textAlign: 'center', width: '100px' }}>ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                      Cargando proveedores...
+                    </td>
+                  </tr>
+                ) : paginatedSuppliers.length > 0 ? (
+                  paginatedSuppliers.map((item) => (
+                    <tr
+                      key={item.id}
+                      style={{
+                        borderBottom: '1px solid #e2e8f0',
+                        backgroundColor: '#ffffff'
+                      }}
+                      className="table-row-hover"
+                    >
+                      {/* Name */}
+                      <td style={{ padding: '20px 24px', fontSize: '15px', color: '#0f172a', fontWeight: '600' }}>
+                        <div>{item.razon_social}</div>
+                        {item.email && <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '400' }}>{item.email}</span>}
+                      </td>
+
+                      {/* NIT */}
+                      <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569' }}>
+                        {item.nit_or_cedula}
+                      </td>
+
+                      {/* Advisor */}
+                      <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569' }}>
+                        {item.assigned_advisor || 'No asignado'}
+                      </td>
+
+                      {/* City */}
+                      <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569' }}>
+                        {item.city || 'No registrada'}
+                      </td>
+
+                      {/* Status */}
+                      <td style={{ padding: '20px 24px' }}>
+                        {item.status === 'active' ? (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            backgroundColor: '#d1fae5',
+                            color: '#065f46',
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
+                            fontSize: '12px',
+                            fontWeight: '700'
+                          }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                            ACTIVO
+                          </span>
+                        ) : (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            backgroundColor: '#fee2e2',
+                            color: '#991b1b',
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
+                            fontSize: '12px',
+                            fontWeight: '700'
+                          }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                            INACTIVO
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: '20px 24px', textAlign: 'center' }}>
+                        <button
+                          onClick={() => startEdit(item)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#475569',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            transition: 'var(--transition-fast)'
+                          }}
+                          className="btn-edit-hover"
+                          title="Editar proveedor"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                      No se encontraron proveedores.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <style dangerouslySetInnerHTML={{ __html: `
+              .table-row-hover:hover {
+                background-color: #f8fafc !important;
+              }
+              .btn-edit-hover:hover {
+                background-color: #f1f5f9;
+                color: #e21a22 !important;
+              }
+            `}} />
+          </div>
+
+          {/* TABLE FOOTER / PAGINATION */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: '#f8fafc',
+            borderTop: '1px solid #e2e8f0',
+            padding: '16px 24px',
+            fontSize: '13px',
+            color: '#64748b'
+          }}>
             <div>
+              Mostrando <strong style={{ color: '#1e293b' }}>{filteredSuppliers.length > 0 ? startIndex + 1 : 0} - {Math.min(endIndex, filteredSuppliers.length)}</strong> de <strong style={{ color: '#1e293b' }}>{filteredSuppliers.length}</strong> registros
+            </div>
+
+            {/* Pagination Controls */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                disabled={currentPage === 1}
+                style={{
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: currentPage === 1 ? '#cbd5e1' : '#64748b',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  cursor: currentPage === 1 ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '600'
+                }}
+                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+              >
+                &lt;
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                <button
+                  key={pageNum}
+                  style={{
+                    border: pageNum === currentPage ? 'none' : '1px solid #cbd5e1',
+                    backgroundColor: pageNum === currentPage ? '#E31B23' : '#ffffff',
+                    color: pageNum === currentPage ? '#ffffff' : '#64748b',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: pageNum === currentPage ? '700' : '600'
+                  }}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={{
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#64748b',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  cursor: (currentPage === totalPages || totalPages === 0) ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '600'
+                }}
+                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+              >
+                &gt;
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. MODAL POPUP FORM */}
+      {isModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.4)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '650px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            padding: '30px',
+            position: 'relative',
+            animation: 'modalSlideIn 0.3s ease-out'
+          }}>
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes modalSlideIn {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+              }
+            `}} />
+            
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#64748b',
+                padding: '4px',
+                borderRadius: '6px',
+                transition: 'background-color 0.2s'
+              }}
+              className="modal-close-hover"
+            >
+              <X size={20} />
+            </button>
+            <style dangerouslySetInnerHTML={{ __html: `
+              .modal-close-hover:hover {
+                background-color: #f1f5f9;
+                color: #0f172a;
+              }
+            `}} />
+
+            {/* Modal Title */}
+            <div style={{ marginBottom: '24px', paddingRight: '24px' }}>
               <h2 className="title-font" style={{
-                fontSize: '18px',
-                fontWeight: '700',
+                fontSize: '20px',
+                fontWeight: '800',
                 color: '#0f172a',
                 marginBottom: '4px'
               }}>
-                {editingSupplier ? 'Editar Proveedor' : 'Crear Proveedor'}
+                {editingSupplier ? 'Editar Proveedor' : 'Registrar Nuevo Proveedor'}
               </h2>
               <p style={{ fontSize: '13px', color: '#64748b' }}>
-                {editingSupplier ? 'Modifique los campos correspondientes.' : 'Ingrese los datos básicos para el nuevo proveedor.'}
+                Ingrese los detalles de identificación, localización y contacto del proveedor comercial.
               </p>
             </div>
 
-            {/* ALERTS BANNERS */}
+            {/* Modal Alert Banner */}
             {alertMsg && (
               <div style={{
                 display: 'flex',
@@ -680,14 +836,14 @@ const Suppliers = ({ user, onLogout }) => {
                 backgroundColor: alertType === 'success' ? '#ecfdf5' : '#fef2f2',
                 border: `1px solid ${alertType === 'success' ? '#a7f3d0' : '#fecaca'}`,
                 color: alertType === 'success' ? '#065f46' : '#991b1b',
-                transition: 'all 0.3s ease'
+                marginBottom: '20px'
               }}>
                 <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>{alertMsg}</span>
               </div>
             )}
 
-            {/* FORM */}
+            {/* Form */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               
               {/* Razón Social */}
@@ -707,117 +863,84 @@ const Suppliers = ({ user, onLogout }) => {
                 />
               </div>
 
-              {/* NIT or Cédula */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  NIT o Cédula *
-                </label>
-                <input
-                  name="nit_or_cedula"
-                  type="text"
-                  placeholder="Ej. 900123456-7"
-                  value={formData.nit_or_cedula}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                  required
-                />
+              {/* Grid for NIT & Advisor */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* NIT or Cédula */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    NIT o Cédula *
+                  </label>
+                  <input
+                    name="nit_or_cedula"
+                    type="text"
+                    placeholder="Ej. 900123456-7"
+                    value={formData.nit_or_cedula}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                    required
+                  />
+                </div>
+
+                {/* Assigned Advisor */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Asesor Asignado
+                  </label>
+                  <input
+                    name="assigned_advisor"
+                    type="text"
+                    placeholder="Ej. Carlos Gomez"
+                    value={formData.assigned_advisor}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
               </div>
 
-              {/* Assigned Advisor */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Asesor Asignado
-                </label>
-                <input
-                  name="assigned_advisor"
-                  type="text"
-                  placeholder="Ej. Carlos Gomez"
-                  value={formData.assigned_advisor}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
-              </div>
+              {/* Grid for Geo Data (Department & City Selects) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* Department dropdown */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Departamento
+                  </label>
+                  <select
+                    name="department"
+                    value={formData.department}
+                    onChange={handleDepartmentChange}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
+                  >
+                    <option value="">Seleccione Departamento</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.name}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Email */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Correo electrónico
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="Ej. ventas@proveedor.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Teléfono
-                </label>
-                <input
-                  name="phone"
-                  type="text"
-                  placeholder="Ej. 604 123 4567"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
-              </div>
-
-              {/* WhatsApp */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  WhatsApp
-                </label>
-                <input
-                  name="whatsapp"
-                  type="text"
-                  placeholder="Ej. 300 123 4567"
-                  value={formData.whatsapp}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
-              </div>
-
-              {/* Department */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Departamento
-                </label>
-                <input
-                  name="department"
-                  type="text"
-                  placeholder="Ej. Cundinamarca"
-                  value={formData.department}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
-              </div>
-
-              {/* City */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Ciudad
-                </label>
-                <input
-                  name="city"
-                  type="text"
-                  placeholder="Ej. Bogotá"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className="input-control"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
-                />
+                {/* City dropdown */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Ciudad
+                  </label>
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    disabled={!formData.department}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
+                  >
+                    <option value="">Seleccione Ciudad</option>
+                    {cities.map((city, index) => (
+                      <option key={index} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Address */}
@@ -836,37 +959,105 @@ const Suppliers = ({ user, onLogout }) => {
                 />
               </div>
 
-              {/* Status Selector */}
-              <div className="input-group">
-                <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
-                  Estado *
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
-                  required
-                >
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
-                </select>
+              {/* Grid for Email & Phone */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* Email */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Correo electrónico
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Ej. ventas@proveedor.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Teléfono
+                  </label>
+                  <input
+                    name="phone"
+                    type="text"
+                    placeholder="Ej. 604 123 4567"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
               </div>
 
-              {/* Form buttons */}
+              {/* Grid for WhatsApp & Status */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* WhatsApp */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    WhatsApp
+                  </label>
+                  <input
+                    name="whatsapp"
+                    type="text"
+                    placeholder="Ej. 300 123 4567"
+                    value={formData.whatsapp}
+                    onChange={handleInputChange}
+                    className="input-control"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
+
+                {/* Status Selector */}
+                <div className="input-group">
+                  <label className="input-label" style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginBottom: '6px', display: 'block' }}>
+                    Estado *
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', color: '#0f172a', outline: 'none', backgroundColor: '#ffffff' }}
+                    required
+                  >
+                    <option value="active">Activo</option>
+                    <option value="inactive">Inactivo</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Form Actions */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                marginTop: '10px'
+                gap: '12px',
+                marginTop: '12px',
+                justifyContent: 'flex-end'
               }}>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  style={{
+                    padding: '10px 18px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    borderRadius: '6px',
+                    backgroundColor: '#f1f5f9',
+                    color: '#475569',
+                    border: '1px solid #cbd5e1',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-primary"
                   style={{
-                    width: '100%',
-                    padding: '12px',
+                    padding: '10px 20px',
                     fontSize: '13px',
                     fontWeight: '700',
                     borderRadius: '6px',
@@ -876,41 +1067,17 @@ const Suppliers = ({ user, onLogout }) => {
                     cursor: submitting ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
                     gap: '8px'
                   }}
                 >
                   <Briefcase size={14} />
-                  {editingSupplier ? 'Actualizar Proveedor' : 'Guardar Proveedor'}
+                  {editingSupplier ? 'Actualizar' : 'Guardar Proveedor'}
                 </button>
-
-                {editingSupplier && (
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="btn btn-secondary"
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      borderRadius: '6px',
-                      backgroundColor: '#f1f5f9',
-                      color: '#475569',
-                      border: '1px solid #cbd5e1',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancelar Edición
-                  </button>
-                )}
               </div>
             </form>
           </div>
-
         </div>
-
-      </div>
+      )}
 
     </div>
   );
