@@ -44,7 +44,7 @@ const Navbar = ({ user, onLogout }) => {
       top: '0',
       zIndex: 900,
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       backgroundColor: '#ffffff',
       borderBottom: '1px solid #e2e8f0',
@@ -53,9 +53,12 @@ const Navbar = ({ user, onLogout }) => {
       width: '100%',
       backdropFilter: 'blur(8px)',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      flexShrink: 0
+      flexShrink: 0,
+      gap: '40px',
+      height: '61px',
+      boxSizing: 'border-box'
     }}>
-      {/* Left: Navigation Options */}
+      {/* Right: Navigation Options */}
       <div style={{ display: 'flex', gap: '30px' }}>
         <button
           onClick={() => navigate('/orders')}

@@ -94,7 +94,7 @@ const Sidebar = ({ activeTab }) => {
       borderRight: '1px solid #cbd5e1',
       display: 'flex',
       flexDirection: 'column',
-      padding: '30px 20px',
+      padding: '0 20px 30px 20px',
       flexShrink: 0,
       boxSizing: 'border-box'
     }}>
@@ -122,9 +122,17 @@ const Sidebar = ({ activeTab }) => {
         }
       `}} />
 
-      {/* STATIC LOGO */}
-      <div style={{ marginBottom: '24px', paddingLeft: '8px', flexShrink: 0 }}>
-        <Logo height={42} />
+      {/* STATIC LOGO CONTAINER - Aligned with Navbar */}
+      <div style={{
+        height: '61px',
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: '12px',
+        borderBottom: '1px solid #cbd5e1',
+        margin: '0 -20px 24px -20px',
+        flexShrink: 0
+      }}>
+        <Logo height={32} />
       </div>
 
       {/* SCROLLABLE NAV SECTION */}
