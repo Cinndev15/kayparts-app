@@ -101,7 +101,8 @@ const Categories = ({ user, onLogout }) => {
             count: '0 unidades', // Mock value
             status: 'OPERATIONAL' // Mock value
           }));
-          setCategories(mapped);
+          const sorted = mapped.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+          setCategories(sorted);
         }
       } catch (err) {
         console.error('Error fetching categories:', err);
@@ -167,7 +168,7 @@ const Categories = ({ user, onLogout }) => {
         status: 'OPERATIONAL'
       };
 
-      setCategories([newCategory, ...categories]);
+      setCategories(prev => [newCategory, ...prev].sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeModal();
 
       // Show beautiful success Toast instead of blocking overlay
@@ -249,7 +250,7 @@ const Categories = ({ user, onLogout }) => {
         return cat;
       });
 
-      setCategories(updatedList);
+      setCategories(updatedList.sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeEditModal();
 
       // Show beautiful success Toast instead of blocking overlay
