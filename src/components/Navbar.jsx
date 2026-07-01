@@ -1,11 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, LogOut } from 'lucide-react';
-import Logo from './Logo';
+import { ChevronDown, LogOut } from 'lucide-react';
 
-const Navbar = ({ user, onLogout, searchQuery, setSearchQuery, searchPlaceholder = "Buscar..." }) => {
+const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPendingOrdersCount = async () => {
+      const token = localStorage.getItem('kayparts_token');
+      if (!token) return;
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+      try {
+        const response = await fetch(`${apiUrl}/orders`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        const data = await response.json();
+        if (response.ok && data && data.data) {
+          // Count orders with status 'pending'
+          const count = data.data.filter(order => order.status === 'pending').length;
+          setPendingCount(count);
+        }
+      } catch (err) {
+        console.error('Error fetching pending orders count:', err);
+      }
+    };
+
+    fetchPendingOrdersCount();
+    
+    // Poll every 30 seconds
+    const interval = setInterval(fetchPendingOrdersCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header style={{
@@ -24,42 +55,7 @@ const Navbar = ({ user, onLogout, searchQuery, setSearchQuery, searchPlaceholder
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       flexShrink: 0
     }}>
-      {/* Left: Logo & Search */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-        <div style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-          <Logo height={36} />
-        </div>
-        
-        {setSearchQuery && (
-          <div style={{ position: 'relative', width: '280px' }}>
-            <Search size={16} style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#94a3b8'
-            }} />
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px 10px 38px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#f8fafc',
-                fontSize: '13px',
-                outline: 'none',
-                color: '#1e293b'
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Middle: Navigation Options */}
+      {/* Left: Navigation Options */}
       <div style={{ display: 'flex', gap: '30px' }}>
         <button
           onClick={() => navigate('/orders')}
@@ -72,11 +68,28 @@ const Navbar = ({ user, onLogout, searchQuery, setSearchQuery, searchPlaceholder
             cursor: 'pointer',
             padding: '8px 0',
             borderBottom: '2px solid transparent',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
           className="nav-link-hover"
         >
           Pedidos
+          {pendingCount > 0 && (
+            <span style={{
+              backgroundColor: '#e21a22',
+              color: '#ffffff',
+              fontSize: '11px',
+              fontWeight: '800',
+              padding: '2px 6px',
+              borderRadius: '9999px',
+              lineHeight: '1',
+              display: 'inline-block'
+            }}>
+              {pendingCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => navigate('/dispatches')}

@@ -300,6 +300,34 @@ const Brands = ({ user, onLogout }) => {
           overflowY: 'auto',
           padding: '30px 40px'
         }}>
+          {/* Local Page Search */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+            <div style={{ position: 'relative', width: '320px' }}>
+              <Search size={16} style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#94a3b8'
+              }} />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 38px',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  fontSize: '13px',
+                  outline: 'none',
+                  color: '#1e293b'
+                }}
+              />
+            </div>
+          </div>
         
         {/* HEADER BAR */}
         
