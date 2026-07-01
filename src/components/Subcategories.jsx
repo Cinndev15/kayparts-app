@@ -115,7 +115,8 @@ const Subcategories = ({ user, onLogout }) => {
             category_name: sub.category_name || 'Sin categoría',
             status: 'OPERATIONAL' // Mock status matching mockup
           }));
-          setSubcategories(mapped);
+          const sorted = mapped.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+          setSubcategories(sorted);
         }
       } catch (err) {
         console.error('Error fetching subcategories data:', err);
@@ -137,6 +138,12 @@ const Subcategories = ({ user, onLogout }) => {
     e.preventDefault();
     if (!newName.trim()) {
       alert('Por favor ingrese el nombre de la subcategoría.');
+      return;
+    }
+
+    const exists = subcategories.some(s => s.name.toLowerCase().trim() === newName.toLowerCase().trim());
+    if (exists) {
+      alert('La subcategoría ya se encuentra registrada.');
       return;
     }
     if (!newCategoryId) {
@@ -190,7 +197,7 @@ const Subcategories = ({ user, onLogout }) => {
         status: 'OPERATIONAL'
       };
 
-      setSubcategories([newSub, ...subcategories]);
+      setSubcategories(prev => [newSub, ...prev].sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeModal();
 
     } catch (err) {
@@ -203,6 +210,12 @@ const Subcategories = ({ user, onLogout }) => {
     e.preventDefault();
     if (!editName.trim()) {
       alert('Por favor ingrese el nombre de la subcategoría.');
+      return;
+    }
+
+    const exists = subcategories.some(s => s.id !== editingSubcategory.id && s.name.toLowerCase().trim() === editName.toLowerCase().trim());
+    if (exists) {
+      alert('La subcategoría ya se encuentra registrada.');
       return;
     }
     if (!editCategoryId) {
@@ -260,7 +273,7 @@ const Subcategories = ({ user, onLogout }) => {
         return sub;
       });
 
-      setSubcategories(updatedList);
+      setSubcategories(updatedList.sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeEditModal();
 
     } catch (err) {

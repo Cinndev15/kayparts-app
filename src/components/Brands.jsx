@@ -132,6 +132,12 @@ const Brands = ({ user, onLogout }) => {
       return;
     }
 
+    const exists = brands.some(b => b.name.toLowerCase().trim() === newName.toLowerCase().trim());
+    if (exists) {
+      alert('La marca de vehículo ya se encuentra registrada.');
+      return;
+    }
+
     const token = localStorage.getItem('kayparts_token');
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
@@ -190,6 +196,12 @@ const Brands = ({ user, onLogout }) => {
     e.preventDefault();
     if (!editName.trim()) {
       alert('Por favor ingrese el nombre de la marca.');
+      return;
+    }
+
+    const exists = brands.some(b => b.id !== editingBrand.id && b.name.toLowerCase().trim() === editName.toLowerCase().trim());
+    if (exists) {
+      alert('La marca de vehículo ya se encuentra registrada.');
       return;
     }
 

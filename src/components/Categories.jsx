@@ -121,6 +121,12 @@ const Categories = ({ user, onLogout }) => {
       setModalError('Por favor ingrese el nombre de la categoría.');
       return;
     }
+
+    const exists = categories.some(c => c.name.toLowerCase().trim() === newName.toLowerCase().trim());
+    if (exists) {
+      setModalError('La categoría ya se encuentra registrada.');
+      return;
+    }
     setModalError('');
 
     const token = localStorage.getItem('kayparts_token');
@@ -198,6 +204,12 @@ const Categories = ({ user, onLogout }) => {
     e.preventDefault();
     if (!editName.trim()) {
       setModalError('Por favor ingrese el nombre de la categoría.');
+      return;
+    }
+
+    const exists = categories.some(c => c.id !== editingCategory.id && c.name.toLowerCase().trim() === editName.toLowerCase().trim());
+    if (exists) {
+      setModalError('La categoría ya se encuentra registrada.');
       return;
     }
     setModalError('');

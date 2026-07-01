@@ -104,7 +104,8 @@ const ProductBrands = ({ user, onLogout }) => {
             location: brand.location || '',
             is_active: brand.is_active === 1 || brand.is_active === true || brand.is_active === '1'
           }));
-          setBrands(mapped);
+          const sorted = mapped.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+          setBrands(sorted);
         }
       } catch (err) {
         console.error('Error fetching product brands:', err);
@@ -126,6 +127,12 @@ const ProductBrands = ({ user, onLogout }) => {
     e.preventDefault();
     if (!newName.trim()) {
       alert('Por favor ingrese el nombre de la marca de producto.');
+      return;
+    }
+
+    const exists = brands.some(b => b.name.toLowerCase().trim() === newName.toLowerCase().trim());
+    if (exists) {
+      alert('La marca de producto ya se encuentra registrada.');
       return;
     }
 
@@ -174,7 +181,7 @@ const ProductBrands = ({ user, onLogout }) => {
         is_active: createdBrand.is_active === 1 || createdBrand.is_active === true || createdBrand.is_active === '1'
       };
 
-      setBrands([newBrand, ...brands]);
+      setBrands(prev => [newBrand, ...prev].sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeModal();
 
     } catch (err) {
@@ -187,6 +194,12 @@ const ProductBrands = ({ user, onLogout }) => {
     e.preventDefault();
     if (!editName.trim()) {
       alert('Por favor ingrese el nombre de la marca de producto.');
+      return;
+    }
+
+    const exists = brands.some(b => b.id !== editingBrand.id && b.name.toLowerCase().trim() === editName.toLowerCase().trim());
+    if (exists) {
+      alert('La marca de producto ya se encuentra registrada.');
       return;
     }
 
@@ -242,7 +255,7 @@ const ProductBrands = ({ user, onLogout }) => {
         return b;
       });
 
-      setBrands(updatedList);
+      setBrands(updatedList.sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeEditModal();
 
     } catch (err) {
