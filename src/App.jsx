@@ -23,6 +23,8 @@ import Articles from './components/Articles';
 import Suppliers from './components/Suppliers';
 import InvoicingResolutions from './components/InvoicingResolutions';
 import Invoices from './components/Invoices';
+import PurchaseOrderSequences from './components/PurchaseOrderSequences';
+import PurchaseOrders from './components/PurchaseOrders';
 import './App.css';
 
 function App() {
@@ -266,6 +268,22 @@ function App() {
           path="/invoices" 
           element={
             user ? <Invoices user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Purchase Order Sequences Route */}
+        <Route 
+          path="/purchase-order-sequences" 
+          element={
+            user ? <PurchaseOrderSequences user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Purchase Orders Route */}
+        <Route 
+          path="/purchase-orders" 
+          element={
+            user ? <PurchaseOrders user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 

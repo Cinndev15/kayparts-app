@@ -12,7 +12,7 @@ const Sidebar = ({ activeTab }) => {
 
   // Child items under submenus
   const productsSubtabs = ['products', 'categories', 'subcategories', 'product-brands', 'brands', 'models', 'years', 'displacements'];
-  const comprasSubtabs = ['suppliers'];
+  const comprasSubtabs = ['suppliers', 'purchase-order-sequences', 'purchase-orders'];
   const ventasSubtabs = ['clients', 'invoicing-resolutions', 'invoices'];
   const despachosSubtabs = ['orders', 'dispatches', 'carriers'];
   
@@ -292,6 +292,22 @@ const Sidebar = ({ activeTab }) => {
                 >
                   <Briefcase size={16} style={{ color: activeTab === 'suppliers' ? '#0f172a' : undefined }} />
                   Proveedores
+                </button>
+                <button
+                  onClick={() => navigate('/purchase-order-sequences')}
+                  style={getSubButtonStyle('purchase-order-sequences')}
+                  className={activeTab !== 'purchase-order-sequences' ? 'sidebar-hover-btn' : ''}
+                >
+                  <ClipboardList size={16} style={{ color: activeTab === 'purchase-order-sequences' ? '#0f172a' : undefined }} />
+                  Formatos / Secuencias OC
+                </button>
+                <button
+                  onClick={() => navigate('/purchase-orders')}
+                  style={getSubButtonStyle('purchase-orders')}
+                  className={activeTab !== 'purchase-orders' ? 'sidebar-hover-btn' : ''}
+                >
+                  <FileText size={16} style={{ color: activeTab === 'purchase-orders' ? '#0f172a' : undefined }} />
+                  Órdenes de Compra
                 </button>
               </div>
             )}
