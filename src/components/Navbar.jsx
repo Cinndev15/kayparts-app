@@ -128,6 +128,23 @@ const Navbar = ({ user, onLogout }) => {
         >
           Productos
         </button>
+        <button
+          onClick={() => navigate('/invoices')}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '700',
+            color: '#475569',
+            cursor: 'pointer',
+            padding: '8px 0',
+            borderBottom: '2px solid transparent',
+            transition: 'all 0.2s'
+          }}
+          className="nav-link-hover"
+        >
+          Facturas
+        </button>
       </div>
 
       {/* Right: Profile */}
