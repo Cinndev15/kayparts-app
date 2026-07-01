@@ -120,7 +120,7 @@ const Products = ({ user, onLogout }) => {
         safeFetch('subcategories'),
         safeFetch('product-brands'),
         safeFetch('vehicle-models'),
-        safeFetch('vehicle-years'),
+        safeFetch('vehicle-years?per_page=1000'),
         safeFetch('vehicle-displacements'),
         safeFetch('taxes')
       ]);
