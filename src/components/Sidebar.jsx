@@ -430,25 +430,8 @@ const Sidebar = ({ activeTab }) => {
         </nav>
       </div>
 
-      {/* Bottom Report / Help */}
+      {/* Bottom Help Link */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <button
-          onClick={() => alert('Creando nuevo reporte operacional...')}
-          className="btn"
-          style={{
-            backgroundColor: '#e21a22',
-            color: '#ffffff',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            justifyContent: 'center',
-            fontWeight: '600',
-            width: '100%'
-          }}
-        >
-          <PlusCircle size={18} />
-          Nuevo reporte
-        </button>
-
         <a
           href="#"
           onClick={(e) => { e.preventDefault(); alert('Abriendo el centro de ayuda de Kayparts...'); }}
