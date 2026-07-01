@@ -7,6 +7,7 @@ import {
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Swal from 'sweetalert2';
+import defaultImage from '../assets/FOTO.png';
 
 const Models = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ const Models = ({ user, onLogout }) => {
         if (modelRes.ok && modelData.data) {
           const mapped = modelData.data.map(m => ({
             id: `MDL-${m.id}`,
-            image: m.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+            image: m.image_url || defaultImage,
             name: m.name,
             brand_id: m.brand_id,
             brand_name: m.brand?.name || m.brand_name || 'Sin marca',
@@ -204,7 +205,7 @@ const Models = ({ user, onLogout }) => {
 
       const newModel = {
         id: `MDL-${created.id}`,
-        image: created.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+        image: created.image_url || defaultImage,
         name: created.name,
         brand_id: created.brand_id,
         brand_name: brands.find(b => b.id === parseInt(created.brand_id))?.name || created.brand_name || 'Sin marca',
@@ -301,7 +302,7 @@ const Models = ({ user, onLogout }) => {
             year_from: updated.year_from || '',
             year_to: updated.year_to || '',
             description: updated.description || '',
-            image: updated.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+            image: updated.image_url || defaultImage,
             is_active: updated.is_active === 1 || updated.is_active === true || updated.is_active === '1'
           };
         }

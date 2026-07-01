@@ -7,6 +7,7 @@ import {
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Swal from 'sweetalert2';
+import defaultImage from '../assets/FOTO.png';
 
 const Products = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -760,7 +761,7 @@ const Products = ({ user, onLogout }) => {
                           height: '46px',
                           borderRadius: '6px',
                           backgroundColor: '#f8fafc',
-                          backgroundImage: `url(${p.main_image || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120'})`,
+                          backgroundImage: `url(${p.main_image || defaultImage})`,
                           backgroundSize: 'contain',
                           backgroundRepeat: 'no-repeat',
                           backgroundPosition: 'center',

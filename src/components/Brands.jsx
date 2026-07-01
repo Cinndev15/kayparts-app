@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import defaultImage from '../assets/FOTO.png';
 
 const Brands = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -100,7 +101,7 @@ const Brands = ({ user, onLogout }) => {
         if (response.ok && data.data) {
           const mapped = data.data.map(brand => ({
             id: `BRD-${brand.id}`,
-            image: brand.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+            image: brand.image_url || defaultImage,
             name: brand.name,
             description: brand.description || '',
             location: brand.location || '',
@@ -176,7 +177,7 @@ const Brands = ({ user, onLogout }) => {
 
       const newBrand = {
         id: `BRD-${createdBrand.id}`,
-        image: createdBrand.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+        image: createdBrand.image_url || defaultImage,
         name: createdBrand.name,
         description: createdBrand.description || '',
         location: createdBrand.location || '',
@@ -250,7 +251,7 @@ const Brands = ({ user, onLogout }) => {
             name: updatedBrand.name,
             description: updatedBrand.description || '',
             location: updatedBrand.location || '',
-            image: updatedBrand.image_url || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=120',
+            image: updatedBrand.image_url || defaultImage,
             is_active: updatedBrand.is_active === 1 || updatedBrand.is_active === true || updatedBrand.is_active === '1'
           };
         }

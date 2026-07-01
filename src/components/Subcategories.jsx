@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import defaultImage from '../assets/FOTO.png';
 
 const Subcategories = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -108,7 +109,7 @@ const Subcategories = ({ user, onLogout }) => {
         if (subRes.ok && subData.data) {
           const mapped = subData.data.map(sub => ({
             id: `SUB-${sub.id}`,
-            image: sub.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120',
+            image: sub.image_url || defaultImage,
             name: sub.name,
             description: sub.description || '',
             category_id: sub.category_id,
@@ -189,7 +190,7 @@ const Subcategories = ({ user, onLogout }) => {
       const created = data.data;
       const newSub = {
         id: `SUB-${created.id}`,
-        image: created.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120',
+        image: created.image_url || defaultImage,
         name: created.name,
         description: created.description || '',
         category_id: created.category_id,
@@ -267,7 +268,7 @@ const Subcategories = ({ user, onLogout }) => {
             description: updated.description || '',
             category_id: updated.category_id,
             category_name: updated.category_name || categories.find(c => c.id === parseInt(editCategoryId))?.name || 'Categoría',
-            image: updated.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120'
+            image: updated.image_url || defaultImage
           };
         }
         return sub;

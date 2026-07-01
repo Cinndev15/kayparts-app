@@ -8,6 +8,7 @@ import {
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Swal from 'sweetalert2';
+import defaultImage from '../assets/FOTO.png';
 
 const Categories = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -95,7 +96,7 @@ const Categories = ({ user, onLogout }) => {
         if (response.ok && data.data) {
           const mapped = data.data.map(cat => ({
             id: `CAT-${cat.id}`,
-            image: cat.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120',
+            image: cat.image_url || defaultImage,
             name: cat.name,
             description: cat.description || '',
             count: '0 unidades', // Mock value
@@ -167,7 +168,7 @@ const Categories = ({ user, onLogout }) => {
 
       const newCategory = {
         id: `CAT-${createdCategory.id}`,
-        image: createdCategory.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120',
+        image: createdCategory.image_url || defaultImage,
         name: createdCategory.name,
         description: createdCategory.description || '',
         count: '0 unidades',
@@ -256,7 +257,7 @@ const Categories = ({ user, onLogout }) => {
             ...cat,
             name: updatedCategory.name,
             description: updatedCategory.description || '',
-            image: updatedCategory.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=120',
+            image: updatedCategory.image_url || defaultImage,
           };
         }
         return cat;
