@@ -128,7 +128,6 @@ const Sidebar = ({ activeTab }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderBottom: '1px solid #cbd5e1',
         margin: '0 -20px 24px -20px',
         flexShrink: 0
       }}>
