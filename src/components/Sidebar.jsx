@@ -127,12 +127,12 @@ const Sidebar = ({ activeTab }) => {
         height: '61px',
         display: 'flex',
         alignItems: 'center',
-        paddingLeft: '12px',
+        justifyContent: 'center',
         borderBottom: '1px solid #cbd5e1',
         margin: '0 -20px 24px -20px',
         flexShrink: 0
       }}>
-        <Logo height={32} />
+        <Logo height={38} />
       </div>
 
       {/* SCROLLABLE NAV SECTION */}
