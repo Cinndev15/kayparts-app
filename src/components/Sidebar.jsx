@@ -13,7 +13,7 @@ const Sidebar = ({ activeTab }) => {
   // Child items under submenus
   const productsSubtabs = ['products', 'categories', 'subcategories', 'product-brands', 'brands', 'models', 'years', 'displacements'];
   const comprasSubtabs = ['suppliers'];
-  const ventasSubtabs = ['clients'];
+  const ventasSubtabs = ['clients', 'invoicing-resolutions', 'invoices'];
   const despachosSubtabs = ['orders', 'dispatches', 'carriers'];
   
   // Collapsible state: initialized to open if the current tab is one of the sub-tabs
@@ -332,6 +332,22 @@ const Sidebar = ({ activeTab }) => {
                 >
                   <Users size={16} style={{ color: activeTab === 'clients' ? '#0f172a' : undefined }} />
                   Clientes
+                </button>
+                <button
+                  onClick={() => navigate('/invoicing-resolutions')}
+                  style={getSubButtonStyle('invoicing-resolutions')}
+                  className={activeTab !== 'invoicing-resolutions' ? 'sidebar-hover-btn' : ''}
+                >
+                  <ClipboardList size={16} style={{ color: activeTab === 'invoicing-resolutions' ? '#0f172a' : undefined }} />
+                  Resoluciones DIAN
+                </button>
+                <button
+                  onClick={() => navigate('/invoices')}
+                  style={getSubButtonStyle('invoices')}
+                  className={activeTab !== 'invoices' ? 'sidebar-hover-btn' : ''}
+                >
+                  <FileText size={16} style={{ color: activeTab === 'invoices' ? '#0f172a' : undefined }} />
+                  Facturas de Venta
                 </button>
               </div>
             )}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Bell, Settings, LogOut, ChevronDown, Info, PackageCheck, Edit2, Eye, X, PlusCircle, MapPin
+  Search, Bell, Settings, LogOut, ChevronDown, Info, PackageCheck, Edit2, Eye, X, PlusCircle, MapPin, FileText
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import Swal from 'sweetalert2';
 
 const Dispatches = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -146,6 +147,60 @@ const Dispatches = ({ user, onLogout }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter]);
+
+  const handleGenerateInvoice = async (orderId) => {
+    const result = await Swal.fire({
+      title: '¿Generar Factura de Venta?',
+      text: 'Se generará la factura oficial en base al pedido despachado y la resolución DIAN activa.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#e21a22',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, Generar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
+
+    const token = localStorage.getItem('kayparts_token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
+
+    try {
+      const response = await fetch(`${apiUrl}/invoices`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ order_id: orderId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          title: 'Factura Generada',
+          text: `Se ha emitido la factura Nro: ${data.data?.invoice_number || ''}`,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonColor: '#0369a1',
+          cancelButtonColor: '#cbd5e1',
+          confirmButtonText: 'Ver Facturas',
+          cancelButtonText: 'Permanecer aquí'
+        }).then((res) => {
+          if (res.isConfirmed) {
+            navigate('/invoices');
+          }
+        });
+      } else {
+        Swal.fire('Error', data.message || 'No se pudo generar la factura de venta.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error de conexión', 'No se pudo conectar al servidor.', 'error');
+    }
+  };
 
   // Handle form field changes
   const handleInputChange = (e) => {
@@ -599,6 +654,24 @@ const Dispatches = ({ user, onLogout }) => {
                           {/* Actions */}
                           <td style={{ padding: '20px 24px', textAlign: 'center' }}>
                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                              {['despachado', 'en_transito', 'entregado'].includes(item.status) && (
+                                <button
+                                  onClick={() => handleGenerateInvoice(item.order_id)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#059669',
+                                    padding: '6px',
+                                    borderRadius: '6px',
+                                    transition: 'var(--transition-fast)'
+                                  }}
+                                  className="btn-edit-hover"
+                                  title="Generar Factura de Venta"
+                                >
+                                  <FileText size={16} />
+                                </button>
+                              )}
                               <button
                                 onClick={() => setSelectedDispatch(item)}
                                 style={{

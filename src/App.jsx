@@ -21,6 +21,8 @@ import Dispatches from './components/Dispatches';
 import Workshops from './components/Workshops';
 import Articles from './components/Articles';
 import Suppliers from './components/Suppliers';
+import InvoicingResolutions from './components/InvoicingResolutions';
+import Invoices from './components/Invoices';
 import './App.css';
 
 function App() {
@@ -248,6 +250,22 @@ function App() {
           path="/suppliers" 
           element={
             user ? <Suppliers user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Invoicing Resolutions Route */}
+        <Route 
+          path="/invoicing-resolutions" 
+          element={
+            user ? <InvoicingResolutions user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
+          } 
+        />
+
+        {/* Invoices Route */}
+        <Route 
+          path="/invoices" 
+          element={
+            user ? <Invoices user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />
           } 
         />
 
