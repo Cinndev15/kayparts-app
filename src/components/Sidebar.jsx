@@ -3,18 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import {
   Grid, Folder, Layers, Car, User, PlusCircle, HelpCircle,
   Wrench, Calendar, Gauge, Tag, Percent, Package, ChevronDown, ChevronRight,
-  Users, Truck, ClipboardList, PackageCheck, FileText, Briefcase
+  Users, Truck, ClipboardList, PackageCheck, FileText, Briefcase, ShoppingCart, DollarSign
 } from 'lucide-react';
 import Logo from './Logo';
 
 const Sidebar = ({ activeTab }) => {
   const navigate = useNavigate();
 
-  // Child items under "Productos" submenu
+  // Child items under submenus
   const productsSubtabs = ['products', 'categories', 'subcategories', 'product-brands', 'brands', 'models', 'years', 'displacements'];
+  const comprasSubtabs = ['suppliers'];
+  const ventasSubtabs = ['clients'];
+  const despachosSubtabs = ['orders', 'dispatches', 'carriers'];
   
   // Collapsible state: initialized to open if the current tab is one of the sub-tabs
   const [isProductsOpen, setIsProductsOpen] = useState(productsSubtabs.includes(activeTab));
+  const [isComprasOpen, setIsComprasOpen] = useState(comprasSubtabs.includes(activeTab));
+  const [isVentasOpen, setIsVentasOpen] = useState(ventasSubtabs.includes(activeTab));
+  const [isDespachosOpen, setIsDespachosOpen] = useState(despachosSubtabs.includes(activeTab));
 
   const getButtonStyle = (tabName) => {
     const isActive = activeTab === tabName;
@@ -57,8 +63,11 @@ const Sidebar = ({ activeTab }) => {
   };
 
   const isAnyChildActive = productsSubtabs.includes(activeTab);
-
-  const getGroupHeaderStyle = () => {
+  const isAnyComprasActive = comprasSubtabs.includes(activeTab);
+  const isAnyVentasActive = ventasSubtabs.includes(activeTab);
+  const isAnyDespachosActive = despachosSubtabs.includes(activeTab);
+ 
+  const getGroupHeaderStyle = (isActive) => {
     return {
       display: 'flex',
       alignItems: 'center',
@@ -69,8 +78,8 @@ const Sidebar = ({ activeTab }) => {
       borderRadius: '8px',
       cursor: 'pointer',
       backgroundColor: 'transparent',
-      color: isAnyChildActive ? '#0f172a' : '#475569',
-      fontWeight: isAnyChildActive ? '700' : '550',
+      color: isActive ? '#0f172a' : '#475569',
+      fontWeight: isActive ? '700' : '550',
       fontSize: '14px',
       textAlign: 'left',
       transition: 'var(--transition-fast)'
@@ -138,31 +147,11 @@ const Sidebar = ({ activeTab }) => {
             Panel de Control
           </button>
 
-          {/* Pedidos */}
-          <button
-            onClick={() => navigate('/orders')}
-            style={getButtonStyle('orders')}
-            className={activeTab !== 'orders' ? 'sidebar-hover-btn' : ''}
-          >
-            <ClipboardList size={18} style={{ color: activeTab === 'orders' ? '#0f172a' : undefined }} />
-            Pedidos
-          </button>
-
-          {/* Despachos */}
-          <button
-            onClick={() => navigate('/dispatches')}
-            style={getButtonStyle('dispatches')}
-            className={activeTab !== 'dispatches' ? 'sidebar-hover-btn' : ''}
-          >
-            <PackageCheck size={18} style={{ color: activeTab === 'dispatches' ? '#0f172a' : undefined }} />
-            Despachos
-          </button>
-
           {/* Group Header: Productos */}
           <div>
             <button
               onClick={() => setIsProductsOpen(!isProductsOpen)}
-              style={getGroupHeaderStyle()}
+              style={getGroupHeaderStyle(isAnyChildActive)}
               className="sidebar-hover-btn"
             >
               <Package size={18} style={{ color: isAnyChildActive ? '#0f172a' : undefined }} />
@@ -173,7 +162,7 @@ const Sidebar = ({ activeTab }) => {
                 <ChevronRight size={14} style={{ color: '#64748b' }} />
               )}
             </button>
-
+ 
             {/* Collapsible Submenu */}
             {isProductsOpen && (
               <div style={{
@@ -194,7 +183,7 @@ const Sidebar = ({ activeTab }) => {
                   <Package size={16} style={{ color: activeTab === 'products' ? '#0f172a' : undefined }} />
                   Catálogo
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/categories')}
                   style={getSubButtonStyle('categories')}
@@ -203,7 +192,7 @@ const Sidebar = ({ activeTab }) => {
                   <Folder size={16} style={{ color: activeTab === 'categories' ? '#0f172a' : undefined }} />
                   Categorías
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/subcategories')}
                   style={getSubButtonStyle('subcategories')}
@@ -212,7 +201,7 @@ const Sidebar = ({ activeTab }) => {
                   <Layers size={16} style={{ color: activeTab === 'subcategories' ? '#0f172a' : undefined }} />
                   Subcategorías
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/product-brands')}
                   style={getSubButtonStyle('product-brands')}
@@ -221,7 +210,7 @@ const Sidebar = ({ activeTab }) => {
                   <Tag size={16} style={{ color: activeTab === 'product-brands' ? '#0f172a' : undefined }} />
                   Marcas Productos
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/brands')}
                   style={getSubButtonStyle('brands')}
@@ -230,7 +219,7 @@ const Sidebar = ({ activeTab }) => {
                   <Car size={16} style={{ color: activeTab === 'brands' ? '#0f172a' : undefined }} />
                   Marcas Vehículos
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/models')}
                   style={getSubButtonStyle('models')}
@@ -239,7 +228,7 @@ const Sidebar = ({ activeTab }) => {
                   <Wrench size={16} style={{ color: activeTab === 'models' ? '#0f172a' : undefined }} />
                   Modelos
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/years')}
                   style={getSubButtonStyle('years')}
@@ -248,7 +237,7 @@ const Sidebar = ({ activeTab }) => {
                   <Calendar size={16} style={{ color: activeTab === 'years' ? '#0f172a' : undefined }} />
                   Años
                 </button>
-
+ 
                 <button
                   onClick={() => navigate('/displacements')}
                   style={getSubButtonStyle('displacements')}
@@ -260,17 +249,145 @@ const Sidebar = ({ activeTab }) => {
               </div>
             )}
           </div>
-
-          {/* Clientes */}
-          <button
-            onClick={() => navigate('/clients')}
-            style={getButtonStyle('clients')}
-            className={activeTab !== 'clients' ? 'sidebar-hover-btn' : ''}
-          >
-            <Users size={18} style={{ color: activeTab === 'clients' ? '#0f172a' : undefined }} />
-            Clientes
-          </button>
-
+ 
+          {/* Group Header: Compras */}
+          <div>
+            <button
+              onClick={() => setIsComprasOpen(!isComprasOpen)}
+              style={getGroupHeaderStyle(isAnyComprasActive)}
+              className="sidebar-hover-btn"
+            >
+              <ShoppingCart size={18} style={{ color: isAnyComprasActive ? '#0f172a' : undefined }} />
+              <span style={{ flex: 1 }}>Compras</span>
+              {isComprasOpen ? (
+                <ChevronDown size={14} style={{ color: '#64748b' }} />
+              ) : (
+                <ChevronRight size={14} style={{ color: '#64748b' }} />
+              )}
+            </button>
+ 
+            {/* Collapsible Submenu */}
+            {isComprasOpen && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                paddingLeft: '16px',
+                marginLeft: '12px',
+                borderLeft: '1px solid #cbd5e1',
+                marginTop: '4px',
+                marginBottom: '4px'
+              }}>
+                <button
+                  onClick={() => navigate('/suppliers')}
+                  style={getSubButtonStyle('suppliers')}
+                  className={activeTab !== 'suppliers' ? 'sidebar-hover-btn' : ''}
+                >
+                  <Briefcase size={16} style={{ color: activeTab === 'suppliers' ? '#0f172a' : undefined }} />
+                  Proveedores
+                </button>
+              </div>
+            )}
+          </div>
+ 
+          {/* Group Header: Ventas */}
+          <div>
+            <button
+              onClick={() => setIsVentasOpen(!isVentasOpen)}
+              style={getGroupHeaderStyle(isAnyVentasActive)}
+              className="sidebar-hover-btn"
+            >
+              <DollarSign size={18} style={{ color: isAnyVentasActive ? '#0f172a' : undefined }} />
+              <span style={{ flex: 1 }}>Ventas</span>
+              {isVentasOpen ? (
+                <ChevronDown size={14} style={{ color: '#64748b' }} />
+              ) : (
+                <ChevronRight size={14} style={{ color: '#64748b' }} />
+              )}
+            </button>
+ 
+            {/* Collapsible Submenu */}
+            {isVentasOpen && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                paddingLeft: '16px',
+                marginLeft: '12px',
+                borderLeft: '1px solid #cbd5e1',
+                marginTop: '4px',
+                marginBottom: '4px'
+              }}>
+                <button
+                  onClick={() => navigate('/clients')}
+                  style={getSubButtonStyle('clients')}
+                  className={activeTab !== 'clients' ? 'sidebar-hover-btn' : ''}
+                >
+                  <Users size={16} style={{ color: activeTab === 'clients' ? '#0f172a' : undefined }} />
+                  Clientes
+                </button>
+              </div>
+            )}
+          </div>
+ 
+          {/* Group Header: Despachos */}
+          <div>
+            <button
+              onClick={() => setIsDespachosOpen(!isDespachosOpen)}
+              style={getGroupHeaderStyle(isAnyDespachosActive)}
+              className="sidebar-hover-btn"
+            >
+              <Truck size={18} style={{ color: isAnyDespachosActive ? '#0f172a' : undefined }} />
+              <span style={{ flex: 1 }}>Despachos</span>
+              {isDespachosOpen ? (
+                <ChevronDown size={14} style={{ color: '#64748b' }} />
+              ) : (
+                <ChevronRight size={14} style={{ color: '#64748b' }} />
+              )}
+            </button>
+ 
+            {/* Collapsible Submenu */}
+            {isDespachosOpen && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                paddingLeft: '16px',
+                marginLeft: '12px',
+                borderLeft: '1px solid #cbd5e1',
+                marginTop: '4px',
+                marginBottom: '4px'
+              }}>
+                <button
+                  onClick={() => navigate('/orders')}
+                  style={getSubButtonStyle('orders')}
+                  className={activeTab !== 'orders' ? 'sidebar-hover-btn' : ''}
+                >
+                  <ClipboardList size={16} style={{ color: activeTab === 'orders' ? '#0f172a' : undefined }} />
+                  Pedidos
+                </button>
+ 
+                <button
+                  onClick={() => navigate('/dispatches')}
+                  style={getSubButtonStyle('dispatches')}
+                  className={activeTab !== 'dispatches' ? 'sidebar-hover-btn' : ''}
+                >
+                  <PackageCheck size={16} style={{ color: activeTab === 'dispatches' ? '#0f172a' : undefined }} />
+                  Despachos
+                </button>
+ 
+                <button
+                  onClick={() => navigate('/carriers')}
+                  style={getSubButtonStyle('carriers')}
+                  className={activeTab !== 'carriers' ? 'sidebar-hover-btn' : ''}
+                >
+                  <Truck size={16} style={{ color: activeTab === 'carriers' ? '#0f172a' : undefined }} />
+                  Transportadoras
+                </button>
+              </div>
+            )}
+          </div>
+ 
           {/* Centros Técnicos */}
           <button
             onClick={() => navigate('/workshops')}
@@ -280,7 +397,7 @@ const Sidebar = ({ activeTab }) => {
             <Wrench size={18} style={{ color: activeTab === 'workshops' ? '#0f172a' : undefined }} />
             Centros Técnicos
           </button>
-
+ 
           {/* Blog / Noticias */}
           <button
             onClick={() => navigate('/articles')}
@@ -290,27 +407,7 @@ const Sidebar = ({ activeTab }) => {
             <FileText size={18} style={{ color: activeTab === 'articles' ? '#0f172a' : undefined }} />
             Noticias
           </button>
-
-          {/* Transportadoras */}
-          <button
-            onClick={() => navigate('/carriers')}
-            style={getButtonStyle('carriers')}
-            className={activeTab !== 'carriers' ? 'sidebar-hover-btn' : ''}
-          >
-            <Truck size={18} style={{ color: activeTab === 'carriers' ? '#0f172a' : undefined }} />
-            Transportadoras
-          </button>
-
-          {/* Proveedores */}
-          <button
-            onClick={() => navigate('/suppliers')}
-            style={getButtonStyle('suppliers')}
-            className={activeTab !== 'suppliers' ? 'sidebar-hover-btn' : ''}
-          >
-            <Briefcase size={18} style={{ color: activeTab === 'suppliers' ? '#0f172a' : undefined }} />
-            Proveedores
-          </button>
-
+ 
           {/* Impuestos */}
           <button
             onClick={() => navigate('/taxes')}
