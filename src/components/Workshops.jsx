@@ -5,11 +5,11 @@ import {
   Wrench, Edit2, Info, CheckCircle2, XCircle
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import Navbar from './Navbar';
 
 const Workshops = ({ user, onLogout }) => {
   const navigate = useNavigate();
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -204,7 +204,8 @@ const Workshops = ({ user, onLogout }) => {
   return (
     <div style={{
       display: 'flex',
-      minHeight: '100vh',
+      height: '100vh',
+      overflow: 'hidden',
       backgroundColor: '#f4f6f8',
       fontFamily: 'var(--font-sans)',
       width: '100vw'
@@ -222,178 +223,22 @@ const Workshops = ({ user, onLogout }) => {
       `}} />
 
       {/* 2. MAIN CONTENT AREA */}
-      <div className="dashboard-main-content" style={{
+      <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflowY: 'auto',
-        maxHeight: '100vh',
-        padding: '30px 40px'
+        height: '100vh',
+        overflow: 'hidden'
       }}>
+        <Navbar user={user} onLogout={onLogout} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <div className="dashboard-main-content" style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '30px 40px'
+        }}>
         
         {/* HEADER BAR */}
-        <header style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '12px 24px',
-          marginBottom: '32px',
-          boxShadow: 'var(--shadow-sm)',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          {/* Header Left Text & Search */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: '16px',
-              fontWeight: '800',
-              color: '#0f172a',
-              letterSpacing: '-0.3px'
-            }}>
-              Kayparts Industrial
-            </span>
-            <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={16} style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8'
-              }} />
-              <input
-                type="text"
-                placeholder="Buscar centro técnico..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px 10px 38px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  fontSize: '13px',
-                  outline: 'none',
-                  color: '#1e293b'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Right Area Nav & Profile */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <div style={{ display: 'flex', gap: '20px' }}>
-              <button
-                onClick={() => navigate('/dashboard')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#64748b',
-                  borderBottom: '2px solid transparent',
-                  padding: '8px 0',
-                  cursor: 'pointer'
-                }}
-              >
-                Panel de Control
-              </button>
-              <button
-                onClick={() => navigate('/products')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#64748b',
-                  borderBottom: '2px solid transparent',
-                  padding: '8px 0',
-                  cursor: 'pointer'
-                }}
-              >
-                Inventario
-              </button>
-            </div>
-
-            <div style={{ width: '1px', height: '28px', backgroundColor: '#e2e8f0' }} />
-
-            {/* Profile Dropdown */}
-            <div style={{ position: 'relative' }}>
-              <div
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  cursor: 'pointer',
-                  userSelect: 'none'
-                }}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f1f5f9',
-                  border: '2px solid #e2e8f0',
-                  backgroundImage: 'url("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <ChevronDown size={14} style={{ color: '#64748b' }} />
-              </div>
-
-              {showProfileDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '180px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '6px',
-                  zIndex: 100
-                }}>
-                  <div style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    borderBottom: '1px solid #f1f5f9',
-                    marginBottom: '4px'
-                  }}>
-                    {user?.email || 'admin@kayparts.com'}
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: '#ef4444',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                    className="dropdown-logout-btn"
-                  >
-                    <LogOut size={14} />
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        
 
         {/* TITLE AND DESCRIPTION */}
         <div style={{ marginBottom: '32px' }}>
@@ -940,6 +785,7 @@ const Workshops = ({ user, onLogout }) => {
       </div>
 
     </div>
+      </div>
   );
 };
 

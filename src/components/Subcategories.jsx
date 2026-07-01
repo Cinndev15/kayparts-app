@@ -5,14 +5,13 @@ import {
   HelpCircle, Grid, Folder, User, CheckCircle2, AlertTriangle,
   XCircle, Filter, Trash2, Edit2, UploadCloud, Layers, Car
 } from 'lucide-react';
-import Logo from './Logo';
 import Sidebar from './Sidebar';
+import Navbar from './Navbar';
 
 const Subcategories = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('subcategories');
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form states for creating a new subcategory
@@ -285,7 +284,8 @@ const Subcategories = ({ user, onLogout }) => {
   return (
     <div style={{
       display: 'flex',
-      minHeight: '100vh',
+      height: '100vh',
+      overflow: 'hidden',
       backgroundColor: '#f4f6f8',
       fontFamily: 'var(--font-sans)',
       width: '100vw'
@@ -304,135 +304,22 @@ const Subcategories = ({ user, onLogout }) => {
       `}} />
 
       {/* 2. MAIN APP CONTAINER (Header + Content Scroll Pane) */}
-      <div className="dashboard-main-content" style={{
+      <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: '100vh',
-        padding: '30px 40px',
-        overflowY: 'auto'
+        height: '100vh',
+        overflow: 'hidden'
       }}>
+        <Navbar user={user} onLogout={onLogout} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <div className="dashboard-main-content" style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '30px 40px'
+        }}>
         
         {/* HEADER */}
-        <header style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '40px',
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          padding: '14px 28px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04)'
-        }}>
-          {/* Live Search bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, maxWidth: '480px' }}>
-            <Search size={18} style={{ color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Buscar subcategorías por nombre, descripción o padre..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                border: 'none',
-                outline: 'none',
-                width: '100%',
-                fontSize: '14px',
-                color: '#1e293b'
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-            {/* Support and config */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#475569' }}>
-              <Bell size={20} style={{ cursor: 'pointer' }} onClick={() => alert('No tiene notificaciones.')} />
-              <Settings size={20} style={{ cursor: 'pointer' }} onClick={() => alert('Ajustes.')} />
-            </div>
-
-            <span style={{ fontSize: '13px', color: '#475569', fontWeight: '500', cursor: 'pointer' }} onClick={() => alert('Contacto de soporte.')}>
-              Soporte
-            </span>
-
-            {/* Profile Dropdown */}
-            <div style={{ position: 'relative' }}>
-              <div
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  cursor: 'pointer',
-                  userSelect: 'none'
-                }}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f1f5f9',
-                  border: '2px solid #e2e8f0',
-                  backgroundImage: 'url("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <ChevronDown size={14} style={{ color: '#64748b' }} />
-              </div>
-
-              {showProfileDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '180px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '6px',
-                  zIndex: 100
-                }}>
-                  <div style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    borderBottom: '1px solid #f1f5f9',
-                    marginBottom: '4px'
-                  }}>
-                    {user?.email || 'admin@kayparts.com'}
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: '#ef4444',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                    className="dropdown-logout-btn"
-                  >
-                    <LogOut size={14} />
-                    Cerrar sesión
-                  </button>
-                  <style dangerouslySetInnerHTML={{
-                    __html: `
-                    .dropdown-logout-btn:hover {
-                      background-color: #fef2f2 !important;
-                    }
-                  `}} />
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        
 
         {/* TITLE AND CREATE NEW SUBCATEGORY BUTTON */}
         <div style={{
@@ -1240,6 +1127,7 @@ const Subcategories = ({ user, onLogout }) => {
       )}
 
     </div>
+      </div>
   );
 };
 

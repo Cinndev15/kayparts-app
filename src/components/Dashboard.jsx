@@ -5,15 +5,14 @@ import {
   HelpCircle, Grid, Folder, User, CheckCircle2, AlertTriangle,
   XCircle, Filter, FileText, Layers, Car
 } from 'lucide-react';
-import Logo from './Logo';
 import Sidebar from './Sidebar';
+import Navbar from './Navbar';
 
 const Dashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [chartView, setChartView] = useState('weekly'); // 'daily' or 'weekly'
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-
+  
   // Sample data for the interactive bar chart
   const weeklyData = [
     { day: 'Lun', val: 50, label: '50%' },
@@ -68,7 +67,8 @@ const Dashboard = ({ user, onLogout }) => {
   return (
     <div style={{
       display: 'flex',
-      minHeight: '100vh',
+      height: '100vh',
+      overflow: 'hidden',
       backgroundColor: '#f4f6f8',
       fontFamily: 'var(--font-sans)',
       width: '100vw'
@@ -89,215 +89,22 @@ const Dashboard = ({ user, onLogout }) => {
 
 
       {/* 2. MAIN APP CONTAINER (Header + Content Scroll Pane) */}
-      <div className="dashboard-main-content" style={{
+      <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflowY: 'auto',
-        maxHeight: '100vh',
-        padding: '30px 40px'
+        height: '100vh',
+        overflow: 'hidden'
       }}>
+        <Navbar user={user} onLogout={onLogout} />
+        <div className="dashboard-main-content" style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '30px 40px'
+        }}>
 
         {/* TOP BAR / HEADER */}
-        <header style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '12px 24px',
-          marginBottom: '32px',
-          boxShadow: 'var(--shadow-sm)',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          {/* Brand Logo & Search */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-            <Logo height={42} />
-            <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={16} style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8'
-              }} />
-              <input
-                type="text"
-                placeholder="Búsqueda rápida de inventario..."
-                style={{
-                  width: '100%',
-                  padding: '10px 12px 10px 38px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  fontSize: '13px',
-                  outline: 'none',
-                  color: '#1e293b'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Navigation Links, Notifications & User Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            {/* Nav tabs */}
-            <div style={{ display: 'flex', gap: '20px' }}>
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '700',
-                  color: activeTab === 'dashboard' ? '#e21a22' : '#64748b',
-                  borderBottom: activeTab === 'dashboard' ? '2px solid #e21a22' : '2px solid transparent',
-                  padding: '8px 0',
-                  cursor: 'pointer',
-                  transition: 'var(--transition-fast)'
-                }}
-              >
-                Panel de Control
-              </button>
-              <button
-                onClick={() => { setActiveTab('inventory'); alert('Módulo de Inventario en desarrollo.'); }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: activeTab === 'inventory' ? '#e21a22' : '#64748b',
-                  borderBottom: activeTab === 'inventory' ? '2px solid #e21a22' : '2px solid transparent',
-                  padding: '8px 0',
-                  cursor: 'pointer',
-                  transition: 'var(--transition-fast)'
-                }}
-              >
-                Inventario
-              </button>
-              <button
-                onClick={() => { setActiveTab('reports'); alert('Módulo de Reportes en desarrollo.'); }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: activeTab === 'reports' ? '#e21a22' : '#64748b',
-                  borderBottom: activeTab === 'reports' ? '2px solid #e21a22' : '2px solid transparent',
-                  padding: '8px 0',
-                  cursor: 'pointer',
-                  transition: 'var(--transition-fast)'
-                }}
-              >
-                Reportes
-              </button>
-            </div>
-
-            {/* Separator line */}
-            <div style={{ width: '1px', height: '28px', backgroundColor: '#e2e8f0' }} />
-
-            {/* Notification and Setting Quick Icons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#475569' }}>
-              <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => alert('No tiene nuevas notificaciones.')}>
-                <Bell size={20} />
-                <span style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  width: '8px',
-                  height: '8px',
-                  backgroundColor: '#e21a22',
-                  borderRadius: '50%',
-                  border: '2px solid #ffffff'
-                }}></span>
-              </div>
-              <Settings size={20} style={{ cursor: 'pointer' }} onClick={() => alert('Ajustes del sistema.')} />
-            </div>
-
-            {/* Profile Dropdown Component */}
-            <div style={{ position: 'relative' }}>
-              <div
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  cursor: 'pointer',
-                  userSelect: 'none'
-                }}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f1f5f9',
-                  border: '2px solid #e2e8f0',
-                  backgroundImage: 'url("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
-                  Admin
-                </span>
-                <ChevronDown size={14} style={{ color: '#64748b' }} />
-              </div>
-
-              {showProfileDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '180px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '6px',
-                  zIndex: 100
-                }}>
-                  <div style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    borderBottom: '1px solid #f1f5f9',
-                    marginBottom: '4px'
-                  }}>
-                    {user?.email || 'admin@kayparts.com'}
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: '#ef4444',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                    className="dropdown-logout-btn"
-                  >
-                    <LogOut size={14} />
-                    Cerrar sesión
-                  </button>
-                  <style dangerouslySetInnerHTML={{
-                    __html: `
-                    .dropdown-logout-btn:hover {
-                      background-color: #fef2f2 !important;
-                    }
-                  `}} />
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        
 
         {/* OPERATIONS OVERVIEW TITLE SECTION */}
         <div style={{
@@ -949,6 +756,7 @@ const Dashboard = ({ user, onLogout }) => {
 
       </div>
     </div>
+      </div>
   );
 };
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Phone, Lock, Save, Bell, Settings, LogOut, ChevronDown, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Sidebar from './Sidebar';
-import Logo from './Logo';
+import Navbar from './Navbar';
 
 const Profile = ({ user, onUserUpdate, onLogout }) => {
   const [formData, setFormData] = useState({
@@ -14,8 +14,7 @@ const Profile = ({ user, onUserUpdate, onLogout }) => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -124,7 +123,8 @@ const Profile = ({ user, onUserUpdate, onLogout }) => {
   return (
     <div style={{
       display: 'flex',
-      minHeight: '100vh',
+      height: '100vh',
+      overflow: 'hidden',
       backgroundColor: '#f4f6f8',
       fontFamily: 'var(--font-sans)',
       width: '100vw'
@@ -152,140 +152,7 @@ const Profile = ({ user, onUserUpdate, onLogout }) => {
       }}>
         
         {/* HEADER */}
-        <header style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '12px 24px',
-          marginBottom: '32px',
-          boxShadow: 'var(--shadow-sm)',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-            <Logo height={42} />
-            <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={16} style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8'
-              }} />
-              <input
-                type="text"
-                placeholder="Búsqueda rápida de inventario..."
-                style={{
-                  width: '100%',
-                  padding: '10px 12px 10px 38px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  fontSize: '13px',
-                  outline: 'none',
-                  color: '#1e293b'
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#475569' }}>
-              <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => alert('No tiene nuevas notificaciones.')}>
-                <Bell size={20} />
-                <span style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  width: '8px',
-                  height: '8px',
-                  backgroundColor: '#e21a22',
-                  borderRadius: '50%',
-                  border: '2px solid #ffffff'
-                }}></span>
-              </div>
-              <Settings size={20} style={{ cursor: 'pointer' }} onClick={() => alert('Ajustes del sistema.')} />
-            </div>
-
-            <div style={{ position: 'relative' }}>
-              <div
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  cursor: 'pointer',
-                  userSelect: 'none'
-                }}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f1f5f9',
-                  border: '2px solid #e2e8f0',
-                  backgroundImage: 'url("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
-                  {user?.name || 'Admin'}
-                </span>
-                <ChevronDown size={14} style={{ color: '#64748b' }} />
-              </div>
-
-              {showProfileDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '180px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '6px',
-                  zIndex: 100
-                }}>
-                  <div style={{
-                    padding: '8px 12px',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    borderBottom: '1px solid #f1f5f9',
-                    marginBottom: '4px'
-                  }}>
-                    {user?.email || 'admin@kayparts.com'}
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      width: '100%',
-                      padding: '8px 12px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: '#ef4444',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                    className="dropdown-logout-btn"
-                  >
-                    <LogOut size={14} />
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        <Navbar user={user} onLogout={onLogout} />
 
         {/* WORKSPACE AREA */}
         <div style={{
