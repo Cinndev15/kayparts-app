@@ -106,7 +106,8 @@ const Brands = ({ user, onLogout }) => {
             location: brand.location || '',
             is_active: brand.is_active === 1 || brand.is_active === true || brand.is_active === '1'
           }));
-          setBrands(mapped);
+          const sorted = mapped.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+          setBrands(sorted);
         }
       } catch (err) {
         console.error('Error fetching brands:', err);
@@ -176,7 +177,7 @@ const Brands = ({ user, onLogout }) => {
         is_active: createdBrand.is_active === 1 || createdBrand.is_active === true || createdBrand.is_active === '1'
       };
 
-      setBrands([newBrand, ...brands]);
+      setBrands(prev => [newBrand, ...prev].sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeModal();
 
     } catch (err) {
@@ -244,7 +245,7 @@ const Brands = ({ user, onLogout }) => {
         return b;
       });
 
-      setBrands(updatedList);
+      setBrands(updatedList.sort((a, b) => a.name.localeCompare(b.name, 'es')));
       closeEditModal();
 
     } catch (err) {
