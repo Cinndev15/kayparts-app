@@ -33,6 +33,7 @@ const Products = ({ user, onLogout }) => {
   const [vehicleYears, setVehicleYears] = useState([]);
   const [vehicleDisplacements, setVehicleDisplacements] = useState([]);
   const [taxes, setTaxes] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   
   // Loading state
   const [loading, setLoading] = useState(true);
@@ -47,6 +48,7 @@ const Products = ({ user, onLogout }) => {
   // Form inputs state
   const [formData, setFormData] = useState({
     sku: '',
+    code: '',
     name: '',
     description: '',
     price: '',
@@ -54,6 +56,7 @@ const Products = ({ user, onLogout }) => {
     brand_id: '',
     category_id: '',
     subcategory_id: '',
+    supplier_id: '',
     status: 'active', // active, inactive, draft
     condition: 'new', // new, used, refurbished
     spare_type: '', // original, homologado, etc.
@@ -80,18 +83,16 @@ const Products = ({ user, onLogout }) => {
   // Structure: { id, image_url, label, is_principal: boolean }
   const [existingImages, setExistingImages] = useState([]);
 
-  // Fetch all master data on mount in parallel
+  // Fetch all master lists from Laravel API on component mount
   const fetchMasterData = async () => {
-    setLoading(true);
     const token = localStorage.getItem('kayparts_token');
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    };
 
     try {
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      };
-
       const safeFetch = async (endpoint) => {
         try {
           const res = await fetch(`${apiUrl}/${endpoint}`, { headers });
@@ -113,7 +114,8 @@ const Products = ({ user, onLogout }) => {
         modelData,
         yearData,
         dispData,
-        taxData
+        taxData,
+        supData
       ] = await Promise.all([
         safeFetch('products?per_page=100'),
         safeFetch('categories'),
@@ -122,7 +124,8 @@ const Products = ({ user, onLogout }) => {
         safeFetch('vehicle-models'),
         safeFetch('vehicle-years?per_page=1000'),
         safeFetch('vehicle-displacements'),
-        safeFetch('taxes')
+        safeFetch('taxes'),
+        safeFetch('suppliers')
       ]);
 
       if (prodData && prodData.data) setProducts(prodData.data);
@@ -133,6 +136,7 @@ const Products = ({ user, onLogout }) => {
       if (yearData) setVehicleYears(yearData.data || yearData);
       if (dispData) setVehicleDisplacements(dispData.data || dispData);
       if (taxData) setTaxes(taxData.data || taxData);
+      if (supData) setSuppliers(supData.data || supData);
 
     } catch (err) {
       console.error('Error fetching master data:', err);
@@ -169,6 +173,7 @@ const Products = ({ user, onLogout }) => {
     setActiveFormTab('general');
     setFormData({
       sku: '',
+      code: '',
       name: '',
       description: '',
       price: '',
@@ -176,6 +181,7 @@ const Products = ({ user, onLogout }) => {
       brand_id: '',
       category_id: '',
       subcategory_id: '',
+      supplier_id: '',
       status: 'active',
       condition: 'new',
       spare_type: '',
@@ -229,6 +235,7 @@ const Products = ({ user, onLogout }) => {
         setActiveFormTab('general');
         setFormData({
           sku: fullProduct.sku || '',
+          code: fullProduct.code || '',
           name: fullProduct.name || '',
           description: fullProduct.description || '',
           price: fullProduct.price ? fullProduct.price.toString() : '',
@@ -236,6 +243,7 @@ const Products = ({ user, onLogout }) => {
           brand_id: fullProduct.brand_id ? fullProduct.brand_id.toString() : '',
           category_id: fullProduct.category_id ? fullProduct.category_id.toString() : '',
           subcategory_id: fullProduct.subcategory_id ? fullProduct.subcategory_id.toString() : '',
+          supplier_id: fullProduct.supplier_id ? fullProduct.supplier_id.toString() : '',
           status: fullProduct.status || 'active',
           condition: fullProduct.condition || 'new',
           spare_type: fullProduct.spare_type || '',
@@ -434,6 +442,7 @@ const Products = ({ user, onLogout }) => {
     if (formData.brand_id) bodyFormData.append('brand_id', formData.brand_id);
     if (formData.category_id) bodyFormData.append('category_id', formData.category_id);
     if (formData.subcategory_id) bodyFormData.append('subcategory_id', formData.subcategory_id);
+    if (formData.supplier_id) bodyFormData.append('supplier_id', formData.supplier_id);
     
     bodyFormData.append('spare_type', formData.spare_type || '');
     bodyFormData.append('position', formData.position || '');
@@ -771,7 +780,12 @@ const Products = ({ user, onLogout }) => {
 
                       {/* SKU */}
                       <td style={{ padding: '20px 24px', fontSize: '13px', fontFamily: 'var(--font-mono)', color: '#475569', fontWeight: '600' }}>
-                        {p.sku}
+                        <div>{p.sku}</div>
+                        {p.code && (
+                          <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '800', marginTop: '4px' }}>
+                            {p.code}
+                          </div>
+                        )}
                       </td>
 
                       {/* Nombre / Ref */}
@@ -1182,6 +1196,35 @@ const Products = ({ user, onLogout }) => {
                           <option key={sub.id} value={sub.id}>{sub.name}</option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Proveedor */}
+                    <div className="input-group">
+                      <label htmlFor="prod-supplier" className="input-label">Proveedor</label>
+                      <select
+                        id="prod-supplier"
+                        name="supplier_id"
+                        value={formData.supplier_id}
+                        onChange={handleInputChange}
+                        className="input-control"
+                      >
+                        <option value="">-- Seleccione Proveedor --</option>
+                        {suppliers.map(sup => (
+                          <option key={sup.id} value={sup.id}>{sup.razon_social} (NIT: {sup.nit_or_cedula})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Código Consecutivo */}
+                    <div className="input-group">
+                      <label className="input-label">Código Consecutivo</label>
+                      <input
+                        type="text"
+                        value={formData.code || 'Se generará automáticamente (KPXXXXXX)'}
+                        disabled
+                        className="input-control"
+                        style={{ backgroundColor: '#f1f5f9', cursor: 'not-allowed' }}
+                      />
                     </div>
 
                     {/* Condición */}
