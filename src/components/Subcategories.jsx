@@ -113,7 +113,7 @@ const Subcategories = ({ user, onLogout }) => {
             name: sub.name,
             description: sub.description || '',
             category_id: sub.category_id,
-            category_name: sub.category_name || 'Sin categoría',
+            category_name: sub.category?.name || sub.category_name || 'Sin categoría',
             status: 'OPERATIONAL' // Mock status matching mockup
           }));
           const sorted = mapped.sort((a, b) => a.name.localeCompare(b.name, 'es'));
