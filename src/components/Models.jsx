@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Settings, LogOut, ChevronDown, PlusCircle,
-  HelpCircle, Trash2, Edit2, UploadCloud
+  HelpCircle, Trash2, Edit2, UploadCloud, X, ArrowRight
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -14,6 +14,13 @@ const Models = ({ user, onLogout }) => {
     const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalError, setModalError] = useState('');
+
+  // Import catalog state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importErrors, setImportErrors] = useState([]);
+  const [importSuccessMessage, setImportSuccessMessage] = useState('');
 
   // Form states for creating a new model
   const [newName, setNewName] = useState('');
@@ -97,54 +104,174 @@ const Models = ({ user, onLogout }) => {
     setModalError('');
   };
 
-  // Fetch models & brands on mount
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem('kayparts_token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+  const openImportModal = () => {
+    setImportFile(null);
+    setImporting(false);
+    setImportErrors([]);
+    setImportSuccessMessage('');
+    setIsImportModalOpen(true);
+  };
 
-      try {
-        // Fetch brands for dropdown
-        const brandRes = await fetch(`${apiUrl}/brands`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-          }
-        });
-        const brandData = await brandRes.json();
-        if (brandRes.ok && brandData.data) {
-          setBrands(brandData.data);
-        }
+  const closeImportModal = () => {
+    setIsImportModalOpen(false);
+    setImportFile(null);
+    setImportErrors([]);
+    setImportSuccessMessage('');
+  };
 
-        // Fetch models
-        const modelRes = await fetch(`${apiUrl}/vehicle-models`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-          }
-        });
-        const modelData = await modelRes.json();
-        if (modelRes.ok && modelData.data) {
-          const mapped = modelData.data.map(m => ({
-            id: `MDL-${m.id}`,
-            image: m.image_url || defaultImage,
-            name: m.name,
-            brand_id: m.brand_id,
-            brand_name: m.brand?.name || m.brand_name || 'Sin marca',
-            year_from: m.year_from || '',
-            year_to: m.year_to || '',
-            description: m.description || '',
-            is_active: m.is_active === 1 || m.is_active === true || m.is_active === '1'
-          }));
-          setModels(mapped);
-        }
-      } catch (err) {
-        console.error('Error fetching models data:', err);
-      } finally {
-        setLoading(false);
+  const handleDownloadTemplate = async () => {
+    const token = localStorage.getItem('kayparts_token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
+    try {
+      const res = await fetch(`${apiUrl}/vehicle-models/import-template`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'vehicle_models_import_template.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Error al descargar la plantilla de importación.');
       }
-    };
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al intentar descargar la plantilla.');
+    }
+  };
 
+  const handleExportBrands = async () => {
+    const token = localStorage.getItem('kayparts_token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
+    try {
+      const res = await fetch(`${apiUrl}/brands/export`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'marcas_vehiculos_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert('Error al exportar el listado de marcas.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al intentar exportar marcas.');
+    }
+  };
+
+  const handleImportModels = async (e) => {
+    e.preventDefault();
+    if (!importFile) {
+      alert('Por favor seleccione un archivo CSV.');
+      return;
+    }
+    setImporting(true);
+    setImportErrors([]);
+    setImportSuccessMessage('');
+    
+    const token = localStorage.getItem('kayparts_token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.kayparts.co/api';
+    
+    const formData = new FormData();
+    formData.append('file', importFile);
+    
+    try {
+      const res = await fetch(`${apiUrl}/vehicle-models/import`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setImportSuccessMessage(data.message);
+        fetchData();
+        if (data.errors && data.errors.length > 0) {
+          setImportErrors(data.errors);
+        } else {
+          setTimeout(() => {
+            closeImportModal();
+            Swal.fire({
+              icon: 'success',
+              title: 'Importación Exitosa',
+              text: data.message,
+              confirmButtonColor: '#e21a22'
+            });
+          }, 1500);
+        }
+      } else {
+        if (data.errors) {
+          setImportErrors(data.errors);
+        } else {
+          alert(data.message || 'Error al importar los modelos.');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión al importar modelos.');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const fetchData = async () => {
+    const token = localStorage.getItem('kayparts_token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+
+    try {
+      const brandRes = await fetch(`${apiUrl}/brands`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      const brandData = await brandRes.json();
+      if (brandRes.ok && brandData.data) {
+        setBrands(brandData.data);
+      }
+
+      const modelRes = await fetch(`${apiUrl}/vehicle-models`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      const modelData = await modelRes.json();
+      if (modelRes.ok && modelData.data) {
+        const mapped = modelData.data.map(m => ({
+          id: `MDL-${m.id}`,
+          image: m.image_url || defaultImage,
+          name: m.name,
+          brand_id: m.brand_id,
+          brand_name: m.brand?.name || m.brand_name || 'Sin marca',
+          year_from: m.year_from || '',
+          year_to: m.year_to || '',
+          description: m.description || '',
+          is_active: m.is_active === 1 || m.is_active === true || m.is_active === '1'
+        }));
+        setModels(mapped);
+      }
+    } catch (err) {
+      console.error('Error fetching models data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -439,19 +566,42 @@ const Models = ({ user, onLogout }) => {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="btn btn-primary"
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: '700',
-              borderRadius: '6px'
-            }}
-          >
-            <PlusCircle size={16} />
-            Crear modelo
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={openImportModal}
+              className="btn"
+              style={{
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontWeight: '700',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#f1f5f9',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                cursor: 'pointer'
+              }}
+            >
+              <UploadCloud size={16} />
+              Cargar modelos
+            </button>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="btn btn-primary"
+              style={{
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontWeight: '700',
+                borderRadius: '6px'
+              }}
+            >
+              <PlusCircle size={16} />
+              Crear modelo
+            </button>
+          </div>
         </div>
 
         {/* TABLE LIST */}
@@ -1280,6 +1430,231 @@ const Models = ({ user, onLogout }) => {
               </div>
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* 4. CSV IMPORT MODAL */}
+      {isImportModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '550px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '1px solid #cbd5e1',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: '750', color: '#0f172a' }}>Importar Modelos desde CSV</h3>
+                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Carga masiva de modelos de vehículos</p>
+              </div>
+              <button 
+                onClick={closeImportModal}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleImportModels}>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* Download Template Section */}
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>1. Descargue los recursos base</h4>
+                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                      Descargue la plantilla oficial. También puede exportar el listado de marcas para obtener los IDs correctos (columna brand_id).
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      style={{
+                        flex: 1,
+                        padding: '8px 14px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        borderRadius: '6px',
+                        backgroundColor: '#334155',
+                        color: '#ffffff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <PlusCircle size={14} />
+                      Plantilla CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportBrands}
+                      style={{
+                        flex: 1,
+                        padding: '8px 14px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        borderRadius: '6px',
+                        backgroundColor: '#0284c7',
+                        color: '#ffffff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <UploadCloud size={14} />
+                      Exportar Marcas
+                    </button>
+                  </div>
+                </div>
+
+                {/* Upload File Input */}
+                <div>
+                  <label className="input-label" style={{ fontWeight: '700', marginBottom: '8px' }}>2. Seleccione el archivo CSV *</label>
+                  <div style={{
+                    border: '2px dashed #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '24px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: importFile ? '#f0fdf4' : '#ffffff',
+                    borderColor: importFile ? '#22c55e' : '#cbd5e1',
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={() => document.getElementById('csv-model-file-input').click()}
+                  >
+                    <UploadCloud size={32} style={{ color: importFile ? '#22c55e' : '#94a3b8', margin: '0 auto 8px' }} />
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#334155', display: 'block' }}>
+                      {importFile ? importFile.name : 'Haga clic para examinar su equipo'}
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                      Solo se admiten archivos .csv estructurados
+                    </span>
+                    <input
+                      id="csv-model-file-input"
+                      type="file"
+                      accept=".csv"
+                      style={{ display: 'none' }}
+                      onChange={(e) => setImportFile(e.target.files[0] || null)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Success Message */}
+                {importSuccessMessage && (
+                  <div style={{
+                    padding: '12px',
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '6px',
+                    color: '#166534',
+                    fontSize: '12px',
+                    fontWeight: '600'
+                  }}>
+                    {importSuccessMessage}
+                  </div>
+                )}
+
+                {/* Error Console */}
+                {importErrors.length > 0 && (
+                  <div>
+                    <label className="input-label" style={{ fontWeight: '700', color: '#b91c1c', marginBottom: '6px' }}>Errores encontrados:</label>
+                    <div style={{
+                      maxHeight: '150px',
+                      overflowY: 'auto',
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fca5a5',
+                      borderRadius: '6px',
+                      padding: '10px 14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      {importErrors.map((err, idx) => (
+                        <div key={idx} style={{ fontSize: '11px', color: '#991b1b', fontFamily: 'var(--font-mono)' }}>
+                          • {err}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Footer Actions */}
+              <div style={{
+                padding: '16px 24px',
+                borderTop: '1px solid #cbd5e1',
+                backgroundColor: '#f8fafc',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px'
+              }}>
+                <button
+                  type="button"
+                  onClick={closeImportModal}
+                  className="btn btn-secondary"
+                  disabled={importing}
+                  style={{ padding: '10px 18px', borderRadius: '6px' }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={importing || !importFile}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: (importing || !importFile) ? 'not-allowed' : 'pointer',
+                    opacity: (importing || !importFile) ? 0.6 : 1
+                  }}
+                >
+                  {importing ? 'Importando...' : 'Iniciar Importación'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
